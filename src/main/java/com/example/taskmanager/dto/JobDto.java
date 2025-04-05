@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class JobDto {
     private Long id;
     private String name;
@@ -21,29 +20,29 @@ public class JobDto {
     private boolean completed;
 
     public static JobDto from(Job job) {
-        return JobDto.builder()
-                .id(job.getId())
-                .name(job.getName())
-                .assignedUser(job.getAssignedUser())
-                .description(job.getDescription())
-                .startTime(job.getStartTime())
-                .endTime(job.getEndTime())
-                .completionTime(job.getCompletionTime())
-                .completed(job.isCompleted())
-                .build();
+        JobDto dto = new JobDto();
+        dto.setId(job.getId());
+        dto.setName(job.getName());
+        dto.setAssignedUser(job.getAssignedUser());
+        dto.setDescription(job.getDescription());
+        dto.setStartTime(job.getStartTime());
+        dto.setEndTime(job.getEndTime());
+        dto.setCompletionTime(job.getCompletionTime());
+        dto.setCompleted(job.isCompleted());
+        return dto;
     }
 
     public Job toEntity(Task task) {
-        return Job.builder()
-                .id(this.id)
-                .task(task)
-                .name(this.name)
-                .assignedUser(this.assignedUser)
-                .description(this.description)
-                .startTime(this.startTime)
-                .endTime(this.endTime)
-                .completionTime(this.completionTime)
-                .completed(this.completed)
-                .build();
+        return new Job(
+            this.id,
+            task,
+            this.name,
+            this.assignedUser,
+            this.description,
+            this.startTime,
+            this.endTime,
+            this.completionTime,
+            this.completed
+        );
     }
 }

@@ -6,12 +6,12 @@ import java.time.LocalDate;
 import java.util.Set;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.HashSet;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class TaskDto {
     private Long id;
     private String name;
@@ -24,29 +24,34 @@ public class TaskDto {
     private List<JobDto> jobs;
 
     public static TaskDto from(Task task) {
-        return TaskDto.builder()
-                .id(task.getId())
-                .name(task.getName())
-                .startDate(task.getStartDate())
-                .plannedEndDate(task.getPlannedEndDate())
-                .completionDate(task.getCompletionDate())
-                .creator(task.getCreator())
-                .description(task.getDescription())
-                .assignees(task.getAssignees())
-                .jobs(task.getJobs() != null ? task.getJobs().stream().map(JobDto::from).collect(Collectors.toList()) : null)
-                .build();
+        TaskDto dto = new TaskDto();
+        dto.setId(task.getId());
+        dto.setName(task.getName());
+        dto.setStartDate(task.getStartDate());
+        dto.setPlannedEndDate(task.getPlannedEndDate());
+        dto.setCompletionDate(task.getCompletionDate());
+        dto.setCreator(task.getCreator());
+        dto.setDescription(task.getDescription());
+        dto.setAssignees(task.getAssignees());
+        
+        if (task.getJobs() != null) {
+            dto.setJobs(task.getJobs().stream()
+                .map(JobDto::from)
+                .collect(Collectors.toList()));
+        }
+        
+        return dto;
     }
 
     public Task toEntity() {
-        return Task.builder()
-                .id(this.id)
-                .name(this.name)
-                .startDate(this.startDate)
-                .plannedEndDate(this.plannedEndDate)
-                .completionDate(this.completionDate)
-                .creator(this.creator)
-                .description(this.description)
-                .assignees(this.assignees)
-                .build();
+        return new Task(
+            this.id,
+            this.name,
+            this.startDate,
+            this.plannedEndDate,
+            this.creator,
+            this.description,
+            this.assignees != null ? this.assignees : new HashSet<>()
+        );
     }
 }

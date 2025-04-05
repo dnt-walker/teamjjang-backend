@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.util.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "tasks")
@@ -13,6 +14,11 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
+    @JsonIgnore
+    private Project project;
     
     private String name;
     private LocalDate startDate;
@@ -45,9 +51,29 @@ public class Task {
         }
     }
     
-    // 완료 상태로 변경하는 메서드
+    // 프로젝트 설정 메서드 (Project 엔티티와의 연결을 위한 추가)
+    public void setProject(Project project) {
+        // 기존 프로젝트에서 제거
+        if (this.project != null) {
+            this.project.removeTask(this);
+        }
+        
+        this.project = project;
+        
+        // 새 프로젝트에 추가
+        if (project != null && !project.getTasks().contains(this)) {
+            project.addTask(this);
+        }
+    }
+    
+    // 완료 처리 메서드
     public void complete() {
         this.completionDate = LocalDate.now();
+    }
+    
+    // 재오픈 메서드
+    public void reopen() {
+        this.completionDate = null;
     }
     
     // 담당자 추가 메서드

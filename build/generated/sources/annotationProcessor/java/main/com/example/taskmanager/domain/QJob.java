@@ -58,7 +58,7 @@ public class QJob extends EntityPathBase<Job> {
 
     public QJob(Class<? extends Job> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.task = inits.isInitialized("task") ? new QTask(forProperty("task")) : null;
+        this.task = inits.isInitialized("task") ? new QTask(forProperty("task"), inits.get("task")) : null;
     }
 
 }

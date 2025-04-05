@@ -21,38 +21,59 @@ public class JobService {
     private final JobRepository jobRepository;
     private final TaskRepository taskRepository;
 
+    @Transactional(readOnly = true)
+    public List<JobDto> getAllJobs() {
+        return jobRepository.findAll().stream()
+                .map(JobDto::from)
+                .collect(Collectors.toList());
+    }
+    
+    @Transactional(readOnly = true)
+    public List<JobDto> getCompletedJobs() {
+        return jobRepository.findByCompletedTrue().stream()
+                .map(JobDto::from)
+                .collect(Collectors.toList());
+    }
+    
+    @Transactional(readOnly = true)
+    public List<JobDto> getJobsByAssignedUser(String assignedUser) {
+        return jobRepository.findByAssignedUser(assignedUser).stream()
+                .map(JobDto::from)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public JobDto saveJob(Long taskId, JobDto jobDto) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new NoSuchElementException("Task not found with id: " + taskId));
         
-        if (jobDto.getId() == null) {
-            // 새로운 Job 생성
-            Job job = jobDto.toEntity(task);
-            Job saved = jobRepository.save(job);
-            return JobDto.from(saved);
-        } else {
-            // 기존 Job 업데이트
-            Job existingJob = jobRepository.findById(jobDto.getId())
-                    .orElseThrow(() -> new NoSuchElementException("Job not found with id: " + jobDto.getId()));
-            
-            existingJob.update(
-                jobDto.getName(),
-                jobDto.getAssignedUser(),
-                jobDto.getDescription(),
-                jobDto.getStartTime(),
-                jobDto.getEndTime()
-            );
-            
-            Job saved = jobRepository.save(existingJob);
-            return JobDto.from(saved);
-        }
+        Job job = jobDto.toEntity(task);
+        Job saved = jobRepository.save(job);
+        return JobDto.from(saved);
     }
 
+    @Transactional(readOnly = true)
     public JobDto getJobById(Long jobId) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new NoSuchElementException("Job not found with id: " + jobId));
         return JobDto.from(job);
+    }
+    
+    @Transactional
+    public JobDto updateJob(Long jobId, JobDto jobDto) {
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new NoSuchElementException("Job not found with id: " + jobId));
+        
+        job.update(
+            jobDto.getName(),
+            jobDto.getAssignedUser(),
+            jobDto.getDescription(),
+            jobDto.getStartTime(),
+            jobDto.getEndTime()
+        );
+        
+        Job updated = jobRepository.save(job);
+        return JobDto.from(updated);
     }
 
     @Transactional
@@ -60,14 +81,9 @@ public class JobService {
         jobRepository.deleteById(jobId);
     }
     
+    @Transactional(readOnly = true)
     public List<JobDto> getJobsByTaskId(Long taskId) {
         return jobRepository.findByTaskId(taskId).stream()
-                .map(JobDto::from)
-                .collect(Collectors.toList());
-    }
-    
-    public List<JobDto> getJobsByTaskIdAndCompleted(Long taskId, boolean completed) {
-        return jobRepository.findByTaskIdAndCompleted(taskId, completed).stream()
                 .map(JobDto::from)
                 .collect(Collectors.toList());
     }
@@ -82,6 +98,17 @@ public class JobService {
         return JobDto.from(savedJob);
     }
     
+    @Transactional
+    public JobDto reopenJob(Long jobId) {
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new NoSuchElementException("Job not found with id: " + jobId));
+        
+        job.reopen();
+        Job savedJob = jobRepository.save(job);
+        return JobDto.from(savedJob);
+    }
+    
+    @Transactional(readOnly = true)
     public double getTaskCompletionPercentage(Long taskId) {
         long completedJobs = jobRepository.countCompletedJobsByTaskId(taskId);
         long totalJobs = jobRepository.countJobsByTaskId(taskId);

@@ -42,7 +42,7 @@ public class Job {
     }
     
     // Task 설정 메서드 (양방향 관계 관리용)
-    protected void setTask(Task task) {
+    void setTask(Task task) {
         this.task = task;
     }
     
@@ -50,6 +50,12 @@ public class Job {
     public void complete() {
         this.completed = true;
         this.completionTime = LocalDateTime.now();
+    }
+    
+    // 재오픈 메서드
+    public void reopen() {
+        this.completed = false;
+        this.completionTime = null;
     }
     
     // 속성 업데이트 메서드

@@ -6,14 +6,13 @@ import java.time.LocalDate;
 import java.util.Set;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.HashSet;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskDto {
     private Long id;
+    private Long projectId;
     private String name;
     private LocalDate startDate;
     private LocalDate plannedEndDate;
@@ -24,23 +23,25 @@ public class TaskDto {
     private List<JobDto> jobs;
 
     public static TaskDto from(Task task) {
-        TaskDto dto = new TaskDto();
-        dto.setId(task.getId());
-        dto.setName(task.getName());
-        dto.setStartDate(task.getStartDate());
-        dto.setPlannedEndDate(task.getPlannedEndDate());
-        dto.setCompletionDate(task.getCompletionDate());
-        dto.setCreator(task.getCreator());
-        dto.setDescription(task.getDescription());
-        dto.setAssignees(task.getAssignees());
-        
-        if (task.getJobs() != null) {
-            dto.setJobs(task.getJobs().stream()
+        List<JobDto> jobDtos = null;
+        if (task.getJobs() != null && !task.getJobs().isEmpty()) {
+            jobDtos = task.getJobs().stream()
                 .map(JobDto::from)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
         }
         
-        return dto;
+        return new TaskDto(
+            task.getId(),
+            task.getProject() != null ? task.getProject().getId() : null,
+            task.getName(),
+            task.getStartDate(),
+            task.getPlannedEndDate(),
+            task.getCompletionDate(),
+            task.getCreator(),
+            task.getDescription(),
+            task.getAssignees(),
+            jobDtos
+        );
     }
 
     public Task toEntity() {
@@ -51,7 +52,7 @@ public class TaskDto {
             this.plannedEndDate,
             this.creator,
             this.description,
-            this.assignees != null ? this.assignees : new HashSet<>()
+            this.assignees
         );
     }
 }

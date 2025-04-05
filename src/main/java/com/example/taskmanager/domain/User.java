@@ -15,20 +15,21 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(unique = true, nullable = false)
+    @Column(name = "username", unique = true, nullable = false)
     private String username;
-    
-    @Column(nullable = false)
+
+    @Column(name = "password", nullable = false)
     private String password;
-    
+
+    @Column(name = "email")
     private String email;
+    @Column(name = "full_name")
     private String fullName;
     
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
     private Set<String> roles = new HashSet<>();
-    
     public User(Long id, String username, String password, String email, String fullName, Set<String> roles) {
         this.id = id;
         this.username = username;

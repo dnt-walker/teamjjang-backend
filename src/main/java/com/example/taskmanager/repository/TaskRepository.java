@@ -14,6 +14,10 @@ public interface TaskRepository extends JpaRepository<Task, Long>, TaskRepositor
     
     List<Task> findByAssigneesContaining(String assignee);
     
+    List<Task> findByCompletionDateIsNotNull();
+    
+    List<Task> findByProjectId(Long projectId);
+    
     @Query("SELECT t FROM Task t WHERE t.completionDate IS NULL AND t.plannedEndDate < :currentDate")
     List<Task> findOverdueTasks(@Param("currentDate") LocalDate currentDate);
     

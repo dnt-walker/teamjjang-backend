@@ -1,7 +1,10 @@
 package com.example.taskmanager.service;
 
+import com.example.taskmanager.domain.Job;
 import com.example.taskmanager.domain.Task;
+import com.example.taskmanager.dto.JobDto;
 import com.example.taskmanager.dto.TaskDto;
+import com.example.taskmanager.repository.JobRepository;
 import com.example.taskmanager.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,13 +17,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
+    private final JobRepository jobRepository;
 
+    @Transactional(readOnly = true)
     public List<TaskDto> getAllTaskDtos() {
         return taskRepository.findAll().stream()
                 .map(TaskDto::from)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public TaskDto getTaskDtoById(Long id) {
         return taskRepository.findById(id)
                 .map(TaskDto::from)
@@ -29,27 +35,26 @@ public class TaskService {
 
     @Transactional
     public TaskDto saveTask(TaskDto dto) {
-        if (dto.getId() == null) {
-            // 새로운 Task 생성
-            Task entity = dto.toEntity();
-            Task saved = taskRepository.save(entity);
-            return TaskDto.from(saved);
-        } else {
-            // 기존 Task 업데이트
-            Task existingTask = taskRepository.findById(dto.getId())
-                    .orElseThrow(() -> new NoSuchElementException("Task not found with id: " + dto.getId()));
-            
-            existingTask.update(
-                dto.getName(), 
-                dto.getDescription(), 
-                dto.getStartDate(), 
-                dto.getPlannedEndDate(), 
-                dto.getAssignees()
-            );
-            
-            Task saved = taskRepository.save(existingTask);
-            return TaskDto.from(saved);
-        }
+        Task entity = dto.toEntity();
+        Task saved = taskRepository.save(entity);
+        return TaskDto.from(saved);
+    }
+    
+    @Transactional
+    public TaskDto updateTask(Long id, TaskDto dto) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Task not found with id: " + id));
+        
+        task.update(
+            dto.getName(), 
+            dto.getDescription(), 
+            dto.getStartDate(), 
+            dto.getPlannedEndDate(), 
+            dto.getAssignees()
+        );
+        
+        Task updated = taskRepository.save(task);
+        return TaskDto.from(updated);
     }
 
     @Transactional
@@ -57,39 +62,23 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
     
+    @Transactional(readOnly = true)
     public List<TaskDto> getTasksByCreator(String creator) {
         return taskRepository.findByCreator(creator).stream()
                 .map(TaskDto::from)
                 .collect(Collectors.toList());
     }
     
+    @Transactional(readOnly = true)
     public List<TaskDto> getTasksByAssignee(String assignee) {
         return taskRepository.findByAssigneesContaining(assignee).stream()
                 .map(TaskDto::from)
                 .collect(Collectors.toList());
     }
     
-    public List<TaskDto> getOverdueTasks() {
-        LocalDate currentDate = LocalDate.now();
-        return taskRepository.findOverdueTasks(currentDate).stream()
-                .map(TaskDto::from)
-                .collect(Collectors.toList());
-    }
-    
-    public List<TaskDto> getIncompleteTasks() {
-        return taskRepository.findIncompleteTasks().stream()
-                .map(TaskDto::from)
-                .collect(Collectors.toList());
-    }
-    
+    @Transactional(readOnly = true)
     public List<TaskDto> getCompletedTasks() {
-        return taskRepository.findCompletedTasks().stream()
-                .map(TaskDto::from)
-                .collect(Collectors.toList());
-    }
-    
-    public List<TaskDto> getActiveTasksOnDate(LocalDate date) {
-        return taskRepository.findActiveTasksOnDate(date).stream()
+        return taskRepository.findByCompletionDateIsNotNull().stream()
                 .map(TaskDto::from)
                 .collect(Collectors.toList());
     }
@@ -105,7 +94,17 @@ public class TaskService {
     }
     
     @Transactional
-    public TaskDto addAssignee(Long taskId, String assignee) {
+    public TaskDto reopenTask(Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Task not found with id: " + id));
+        
+        task.reopen();
+        Task saved = taskRepository.save(task);
+        return TaskDto.from(saved);
+    }
+    
+    @Transactional
+    public TaskDto addAssigneeToTask(Long taskId, String assignee) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new NoSuchElementException("Task not found with id: " + taskId));
         
@@ -115,7 +114,7 @@ public class TaskService {
     }
     
     @Transactional
-    public TaskDto removeAssignee(Long taskId, String assignee) {
+    public TaskDto removeAssigneeFromTask(Long taskId, String assignee) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new NoSuchElementException("Task not found with id: " + taskId));
         
@@ -124,15 +123,71 @@ public class TaskService {
         return TaskDto.from(saved);
     }
     
-    public List<TaskDto> searchTasks(String keyword, String creator, String assignee, 
-                                   Boolean isCompleted, LocalDate startDateFrom, 
-                                   LocalDate startDateTo, LocalDate endDateFrom, 
-                                   LocalDate endDateTo) {
-        return taskRepository.searchTasks(
-                keyword, creator, assignee, isCompleted, startDateFrom, 
-                startDateTo, endDateFrom, endDateTo
-            ).stream()
-            .map(TaskDto::from)
-            .collect(Collectors.toList());
+    @Transactional
+    public JobDto addJobToTask(Long taskId, JobDto jobDto) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found with id: " + taskId));
+        
+        Job job = jobDto.toEntity(task);
+        Job saved = jobRepository.save(job);
+        task.addJob(saved);
+        taskRepository.save(task);
+        
+        return JobDto.from(saved);
+    }
+    
+    @Transactional
+    public JobDto getJobFromTask(Long taskId, Long jobId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found with id: " + taskId));
+        
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new NoSuchElementException("Job not found with id: " + jobId));
+        
+        if (job.getTask() == null || !job.getTask().getId().equals(taskId)) {
+            throw new IllegalArgumentException("Job does not belong to the specified task");
+        }
+        
+        return JobDto.from(job);
+    }
+    
+    @Transactional
+    public JobDto updateJobInTask(Long taskId, Long jobId, JobDto jobDto) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found with id: " + taskId));
+        
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new NoSuchElementException("Job not found with id: " + jobId));
+        
+        if (job.getTask() == null || !job.getTask().getId().equals(taskId)) {
+            throw new IllegalArgumentException("Job does not belong to the specified task");
+        }
+        
+        job.update(
+            jobDto.getName(),
+            jobDto.getAssignedUser(),
+            jobDto.getDescription(),
+            jobDto.getStartTime(),
+            jobDto.getEndTime()
+        );
+        
+        Job updated = jobRepository.save(job);
+        return JobDto.from(updated);
+    }
+    
+    @Transactional
+    public void removeJobFromTask(Long taskId, Long jobId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found with id: " + taskId));
+        
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new NoSuchElementException("Job not found with id: " + jobId));
+        
+        if (job.getTask() == null || !job.getTask().getId().equals(taskId)) {
+            throw new IllegalArgumentException("Job does not belong to the specified task");
+        }
+        
+        task.removeJob(job);
+        jobRepository.delete(job);
     }
 }

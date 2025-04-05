@@ -11,6 +11,10 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     List<Job> findByTaskId(Long taskId);
     
+    List<Job> findByCompletedTrue();
+    
+    List<Job> findByAssignedUser(String assignedUser);
+    
     @Query("SELECT j FROM Job j WHERE j.task.id = :taskId AND j.completed = :completed")
     List<Job> findByTaskIdAndCompleted(@Param("taskId") Long taskId, @Param("completed") boolean completed);
     

@@ -5,6 +5,7 @@ import com.example.taskmanager.domain.Task;
 import com.example.taskmanager.dto.JobDto;
 import com.example.taskmanager.repository.JobRepository;
 import com.example.taskmanager.repository.TaskRepository;
+import com.example.taskmanager.dto.Status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -123,6 +124,23 @@ public class JobService {
         job.reopen();
         Job savedJob = jobRepository.save(job);
         return JobDto.from(savedJob);
+    }
+    
+    @Transactional
+    public JobDto changeJobStatus(Long projectId, Long taskId, Long jobId, Status status) {
+        Task task = taskRepository.findByIdAndProjectId(taskId, projectId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found under project"));
+
+        Job job = jobRepository.findByIdAndTaskId(jobId, taskId)
+                .orElseThrow(() -> new NoSuchElementException("Job not found under task"));
+        
+        // 상태 변경
+        job.setStatus(status);
+        
+        // 상태에 따라 완료 여부 업데이트
+        job.updateCompletionByStatus();
+        
+        return JobDto.from(jobRepository.save(job));
     }
     
     @Transactional(readOnly = true)

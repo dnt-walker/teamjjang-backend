@@ -36,6 +36,9 @@ public class JobDto {
 
     @Schema(description = "작업 완료 시간", example = "2025-04-03T18:00:00")
     private LocalDateTime completionTime;
+    
+    @Schema(description = "작업 상태", example = "IN_PROGRESS")
+    private Status status;
 
     public static JobDto from(Job job) {
         JobDto dto = new JobDto();
@@ -47,6 +50,7 @@ public class JobDto {
         dto.setEndTime(job.getEndTime());
         dto.setCompletionTime(job.getCompletionTime());
         dto.setCompleted(job.isCompleted());
+        dto.setStatus(job.getStatus());
         return dto;
     }
 
@@ -60,7 +64,8 @@ public class JobDto {
             this.startTime,
             this.endTime,
             this.completionTime,
-            this.completed
+            this.completed,
+            this.status != null ? this.status : Status.CREATED
         );
     }
 }

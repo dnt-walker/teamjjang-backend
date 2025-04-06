@@ -3,12 +3,11 @@ package com.example.taskmanager.dto;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Arrays;
 
 @Getter
-public enum JobStatus {
+public enum Status {
     CREATED("C", "created"),
     WAITING("W", "waiting"),
     // todo
@@ -21,7 +20,7 @@ public enum JobStatus {
     private final String statusCode;
     private final String statusName;
 
-    JobStatus(String statusCode, String statusName) {
+    Status(String statusCode, String statusName) {
         this.statusCode = statusCode;
         this.statusName = statusName;
     }
@@ -31,16 +30,16 @@ public enum JobStatus {
         return this.statusName;
     }
 
-    public static JobStatus codeOf(String code) {
-        return Arrays.stream(JobStatus.values())
+    public static Status codeOf(String code) {
+        return Arrays.stream(Status.values())
                 .filter(v -> v.getStatusCode().equalsIgnoreCase(code))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("not found code(%s) in JobStatus.", code)));
     }
 
     @JsonCreator
-    public static JobStatus nameOf(String name) {
-        return Arrays.stream(JobStatus.values())
+    public static Status nameOf(String name) {
+        return Arrays.stream(Status.values())
                 .filter(v->v.getStatusName().equalsIgnoreCase(name))
                 .findAny()
                 .orElseThrow(()->new IllegalArgumentException(String.format("not found value(%s) in PeJobStatusriodStatus.", name)));

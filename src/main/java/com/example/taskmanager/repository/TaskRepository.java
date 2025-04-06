@@ -25,6 +25,32 @@ public interface TaskRepository extends JpaRepository<Task, Long>, TaskRepositor
     
     List<Task> findByProjectIdAndCompletionDateIsNull(Long projectId);
     
+    // 카운트 메서드
+    long countByAssigneesContaining(String assignee);
+    
+    long countByCompletionDateIsNotNull();
+    
+    long countByPlannedEndDateBeforeAndCompletionDateIsNull(LocalDate date);
+    
+    long countByPlannedEndDateBetweenAndCompletionDateIsNull(LocalDate startDate, LocalDate endDate);
+    
+    long countByStartDateIsNull();
+    
+    long countByCompletionDateIsNullAndStartDateIsNotNull();
+    
+    long countByCompletionDateBetween(LocalDate startDate, LocalDate endDate);
+    
+    long countByCompletionDateBetweenAndAssigneesContaining(LocalDate startDate, LocalDate endDate, String assignee);
+    
+    List<Task> findByPlannedEndDateBetweenAndCompletionDateIsNullAndAssigneesContaining(
+            LocalDate startDate, LocalDate endDate, String assignee);
+    
+    List<Task> findByPlannedEndDateBeforeAndCompletionDateIsNullAndAssigneesContaining(
+            LocalDate date, String assignee);
+    
+    @Query("SELECT a, COUNT(t) FROM Task t JOIN t.assignees a GROUP BY a")
+    List<Object[]> countTasksByAssignee();
+    
     // JobStatus에 따른 필터링을 위한 메서드들
     List<Task> findByProjectIdAndStartDateIsNull(Long projectId);
     

@@ -1,6 +1,6 @@
 package com.example.taskmanager.domain;
 
-import com.example.taskmanager.dto.JobStatus;
+import com.example.taskmanager.dto.Status;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import lombok.Generated;
@@ -8,25 +8,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Converter
-public class JobStatusConverter implements AttributeConverter<JobStatus, String> {
+public class StatusConverter implements AttributeConverter<Status, String> {
     @Generated
-    private static final Logger log = LoggerFactory.getLogger(JobStatusConverter.class);
+    private static final Logger log = LoggerFactory.getLogger(StatusConverter.class);
 
-    public JobStatusConverter() {
+    public StatusConverter() {
     }
 
-    public String convertToDatabaseColumn(JobStatus jobStatus) {
-        return jobStatus == null ? null : jobStatus.getStatusCode();
+    public String convertToDatabaseColumn(Status status) {
+        return status == null ? null : status.getStatusCode();
     }
 
-    public JobStatus convertToEntityAttribute(String code) {
+    public Status convertToEntityAttribute(String code) {
         if (code == null) {
             return null;
         } else {
-            JobStatus result = null;
+            Status result = null;
 
             try {
-                result = JobStatus.codeOf(code);
+                result = Status.codeOf(code);
             } catch (IllegalArgumentException aex) {
                 log.error("## failure to convert cause unexperted name [{}]", aex);
             }

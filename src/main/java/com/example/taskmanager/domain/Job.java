@@ -1,5 +1,6 @@
 package com.example.taskmanager.domain;
 
+import com.example.taskmanager.dto.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -40,8 +41,12 @@ public class Job {
     @Column(name = "completed")
     private boolean completed;
     
+    @Column(name = "status", length = 1)
+    @Convert(converter = StatusConverter.class)
+    private Status status;
+    
     public Job(Long id, Task task, String name, String assignedUser, String description,
-              LocalDateTime startTime, LocalDateTime endTime, LocalDateTime completionTime, boolean completed) {
+              LocalDateTime startTime, LocalDateTime endTime, LocalDateTime completionTime, boolean completed, Status status) {
         this.id = id;
         this.task = task;
         this.name = name != null ? name : "";
@@ -51,6 +56,7 @@ public class Job {
         this.endTime = endTime;
         this.completionTime = completionTime;
         this.completed = completed;
+        this.status = status != null ? status : Status.CREATED;
     }
     
     // Task 설정 메서드 (양방향 관계 관리용)
@@ -68,6 +74,42 @@ public class Job {
     public void reopen() {
         this.completed = false;
         this.completionTime = null;
+    }
+    
+    // 상태 설정 메서드
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+    
+    // 작업 상태에 따른 완료 여부 업데이트
+    public void updateCompletionByStatus() {
+        if (this.status == Status.SUCCEEDED || 
+            this.status == Status.FINISHED ||
+            this.status == Status.FAILED) {
+            this.complete();
+        } else {
+            this.reopen();
+        }
+    }
+    
+    // 상태 확인 메서드
+    public boolean isCompleted() {
+        return this.completed;
+    }
+    
+    // 상태 확인 메서드
+    public boolean isInProgress() {
+        return Status.IN_PROGRESS.equals(this.status);
+    }
+    
+    // 상태 확인 메서드
+    public boolean isWaiting() {
+        return Status.WAITING.equals(this.status);
+    }
+    
+    // 상태 확인 메서드
+    public boolean isCreated() {
+        return Status.CREATED.equals(this.status);
     }
     
     // 속성 업데이트 메서드

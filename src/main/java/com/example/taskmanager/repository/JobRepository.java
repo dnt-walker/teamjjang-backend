@@ -1,6 +1,7 @@
 package com.example.taskmanager.repository;
 
 import com.example.taskmanager.domain.Job;
+import com.example.taskmanager.dto.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,6 +19,10 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     List<Job> findByCompletedTrue();
     
     List<Job> findByAssignedUser(String assignedUser);
+    
+    long countByStatus(Status status);
+    
+    long countByStatusAndAssignedUser(Status status, String assignedUser);
     
     @Query("SELECT j FROM Job j WHERE j.task.id = :taskId AND j.completed = :completed")
     List<Job> findByTaskIdAndCompleted(@Param("taskId") Long taskId, @Param("completed") boolean completed);

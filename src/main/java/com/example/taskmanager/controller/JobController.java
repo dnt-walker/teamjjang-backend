@@ -1,6 +1,7 @@
 package com.example.taskmanager.controller;
 
 import com.example.taskmanager.dto.JobDto;
+import com.example.taskmanager.dto.Status;
 import com.example.taskmanager.service.JobService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -67,18 +68,16 @@ public class JobController {
     }
     
     @PatchMapping("/{id}/status")
-    @Operation(summary = "작업 상태 변경", description = "특정 ID의 작업 완료 상태를 변경합니다.")
+    @Operation(summary = "작업 상태 변경", description = "특정 ID의 작업 상태를 변경합니다.")
     public ResponseEntity<JobDto> updateJobStatus(
             @PathVariable @Parameter(description = "프로젝트 ID") Long projectId,
             @PathVariable @Parameter(description = "태스크 ID") Long taskId,
             @PathVariable @Parameter(description = "상태를 변경할 작업 ID") Long id,
-            @RequestParam(required = true) @Parameter(description = "작업 완료 여부 (true: 완료, false: 진행중)") boolean completed,
+            @RequestParam @Parameter(description = "변경할 상태 (CREATED, WAITING, IN_PROGRESS, SUCCEEDED, FAILED, FINISHED, REMOVED)") Status status,
             @AuthenticationPrincipal UserDetails userDetails) {
         
-        JobDto updated = completed
-            ? jobService.completeJob(projectId, taskId, id)
-            : jobService.reopenJob(projectId, taskId, id); // 재오픈 메서드 추가 필요
-        
+        // Status 기반으로 작업 상태 변경
+        JobDto updated = jobService.changeJobStatus(projectId, taskId, id, status);
         return ResponseEntity.ok(updated);
     }
 

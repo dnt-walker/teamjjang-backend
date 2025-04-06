@@ -1,10 +1,8 @@
 package com.example.taskmanager.service;
 
-import com.example.taskmanager.domain.Job;
 import com.example.taskmanager.domain.Project;
 import com.example.taskmanager.domain.Task;
-import com.example.taskmanager.dto.JobDto;
-import com.example.taskmanager.dto.JobStatus;
+import com.example.taskmanager.dto.Status;
 import com.example.taskmanager.dto.TaskDto;
 import com.example.taskmanager.repository.JobRepository;
 import com.example.taskmanager.repository.ProjectRepository;
@@ -29,15 +27,15 @@ public class TaskService {
      * JobStatus 기준으로 필터링할 수 있습니다.
      * 
      * @param projectId 프로젝트 ID
-     * @param jobStatus 작업 상태 (필터링용)
+     * @param status 작업 상태 (필터링용)
      * @return 태스크 DTO 리스트
      */
     @Transactional(readOnly = true)
-    public List<TaskDto> getTasksByProjectId(Long projectId, JobStatus jobStatus) {
+    public List<TaskDto> getTasksByProjectId(Long projectId, Status status) {
         List<Task> tasks;
         
         // 프로젝트에 속한 모든 태스크 조회
-        if (jobStatus == null) {
+        if (status == null) {
             tasks = taskRepository.findByProjectId(projectId);
             return tasks.stream()
                     .map(TaskDto::fromWithProject)
@@ -45,7 +43,7 @@ public class TaskService {
         }
         
         // JobStatus에 따른 필터링 처리
-        switch (jobStatus) {
+        switch (status) {
             case CREATED:
                 // 생성된 태스크 (아직 시작되지 않은 태스크)
                 tasks = taskRepository.findByProjectIdAndStartDateIsNull(projectId);

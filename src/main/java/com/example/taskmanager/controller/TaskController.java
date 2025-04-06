@@ -1,8 +1,7 @@
 package com.example.taskmanager.controller;
 
-import com.example.taskmanager.dto.JobStatus;
+import com.example.taskmanager.dto.Status;
 import com.example.taskmanager.dto.TaskDto;
-import com.example.taskmanager.dto.JobDto;
 import com.example.taskmanager.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,10 +39,10 @@ public class TaskController {
     @Operation(summary = "프로젝트의 태스크 목록 조회", description = "특정 프로젝트에 속한 태스크를 조회합니다. JobStatus를 사용하여 태스크 상태별로 필터링할 수 있습니다.")
     public ResponseEntity<List<TaskDto>> getProjectTasks(
             @PathVariable @Parameter(description = "프로젝트 ID") Long projectId,
-            @RequestParam(required = false) @Parameter(description = "태스크 상태 필터링 (CREATED: 생성됨, WAITING: 대기 중, IN_PROGRESS: 진행 중, SUCCEEDED/FINISHED: 완료됨, FAILED: 실패)") JobStatus jobStatus,
+            @RequestParam(required = false) @Parameter(description = "태스크 상태 필터링 (CREATED: 생성됨, WAITING: 대기 중, IN_PROGRESS: 진행 중, SUCCEEDED/FINISHED: 완료됨, FAILED: 실패)") Status status,
             @AuthenticationPrincipal UserDetails userDetails) {
         
-        List<TaskDto> tasks = taskService.getTasksByProjectId(projectId, jobStatus);
+        List<TaskDto> tasks = taskService.getTasksByProjectId(projectId, status);
         
         return ResponseEntity.ok(tasks);
     }

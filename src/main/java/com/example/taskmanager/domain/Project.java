@@ -12,17 +12,28 @@ import java.util.*;
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "project_id")
     private Long id;
     
+    @Column(name = "name", length = 128)
     private String name;
+
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+    
+    @Column(name = "start_date")
     private LocalDate startDate;
+    
+    @Column(name = "end_date")
     private LocalDate endDate;
+    
+    @Column(name = "manager", length = 128)
     private String manager;
+    
+    @Column(name = "active")
     private boolean active;
     
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Task> tasks = new ArrayList<>();
+
     
     public Project(Long id, String name, String description, LocalDate startDate, 
                    LocalDate endDate, String manager, boolean active) {
@@ -35,17 +46,8 @@ public class Project {
         this.active = active;
     }
     
-    // Task 추가 메서드
-    public void addTask(Task task) {
-        this.tasks.add(task);
-        // Task에 project 설정은 Task 클래스 내에서 처리
-    }
-    
-    // Task 제거 메서드
-    public void removeTask(Task task) {
-        this.tasks.remove(task);
-        // Task에서 project 제거는 Task 클래스 내에서 처리
-    }
+    // Project의 Tasks 관련 메서드 제거
+    // 기존 양방향 관계를 단방향으로 변경
     
     // 완료 처리 메서드
     public void complete() {

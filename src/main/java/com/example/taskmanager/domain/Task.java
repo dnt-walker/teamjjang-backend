@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "task_id")
     private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -20,22 +21,29 @@ public class Task {
     @JsonIgnore
     private Project project;
     
+    @Column(name = "name", length = 128)
     private String name;
+    
+    @Column(name = "start_date")
     private LocalDate startDate;
+    
+    @Column(name = "planned_end_date")
     private LocalDate plannedEndDate;
+    
+    @Column(name = "completion_date")
     private LocalDate completionDate;
+    
+    @Column(name = "creator", length = 128)
     private String creator;
 
     @Lob
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @ElementCollection
     @CollectionTable(name = "task_assignees", joinColumns = @JoinColumn(name = "task_id"))
     @Column(name = "assignee")
     private Set<String> assignees = new HashSet<>();
-
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Job> jobs = new ArrayList<>();
     
     public Task(Long id, String name, LocalDate startDate, LocalDate plannedEndDate, 
                 String creator, String description, Set<String> assignees) {
@@ -51,19 +59,14 @@ public class Task {
         }
     }
     
-    // 프로젝트 설정 메서드 (Project 엔티티와의 연결을 위한 추가)
+    // Project 관련 메서드 수정 - 단방향 관계로 변경
     public void setProject(Project project) {
-        // 기존 프로젝트에서 제거
-        if (this.project != null) {
-            this.project.removeTask(this);
-        }
-        
         this.project = project;
-        
-        // 새 프로젝트에 추가
-        if (project != null && !project.getTasks().contains(this)) {
-            project.addTask(this);
-        }
+    }
+    
+    // 완료일 설정 메서드
+    public void setCompletionDate(LocalDate completionDate) {
+        this.completionDate = completionDate;
     }
     
     // 완료 처리 메서드
@@ -89,18 +92,6 @@ public class Task {
         if (this.assignees != null) {
             this.assignees.remove(assignee);
         }
-    }
-    
-    // Job 추가 메서드
-    public void addJob(Job job) {
-        this.jobs.add(job);
-        job.setTask(this);
-    }
-    
-    // Job 제거 메서드
-    public void removeJob(Job job) {
-        this.jobs.remove(job);
-        job.setTask(null);
     }
     
     // 속성 업데이트 메서드

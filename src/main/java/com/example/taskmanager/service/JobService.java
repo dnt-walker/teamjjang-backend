@@ -53,17 +53,24 @@ public class JobService {
     }
 
     @Transactional(readOnly = true)
-    public JobDto getJobById(Long jobId) {
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new NoSuchElementException("Job not found with id: " + jobId));
+    public JobDto getJobById(Long projectId, Long taskId, Long jobId) {
+        Task task = taskRepository.findByIdAndProjectId(taskId, projectId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found under project"));
+
+        Job job = jobRepository.findByIdAndTaskId(jobId, taskId)
+                .orElseThrow(() -> new NoSuchElementException("Job not found under task"));
+
         return JobDto.from(job);
     }
-    
+
     @Transactional
-    public JobDto updateJob(Long jobId, JobDto jobDto) {
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new NoSuchElementException("Job not found with id: " + jobId));
-        
+    public JobDto updateJob(Long projectId, Long taskId, Long jobId, JobDto jobDto) {
+        Task task = taskRepository.findByIdAndProjectId(taskId, projectId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found under project"));
+
+        Job job = jobRepository.findByIdAndTaskId(jobId, taskId)
+                .orElseThrow(() -> new NoSuchElementException("Job not found under task"));
+
         job.update(
             jobDto.getName(),
             jobDto.getAssignedUser(),
@@ -71,14 +78,19 @@ public class JobService {
             jobDto.getStartTime(),
             jobDto.getEndTime()
         );
-        
-        Job updated = jobRepository.save(job);
-        return JobDto.from(updated);
+
+        return JobDto.from(jobRepository.save(job));
     }
 
     @Transactional
-    public void removeJob(Long jobId) {
-        jobRepository.deleteById(jobId);
+    public void removeJob(Long projectId, Long taskId, Long jobId) {
+        Task task = taskRepository.findByIdAndProjectId(taskId, projectId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found under project"));
+
+        Job job = jobRepository.findByIdAndTaskId(jobId, taskId)
+                .orElseThrow(() -> new NoSuchElementException("Job not found under task"));
+
+        jobRepository.delete(job);
     }
     
     @Transactional(readOnly = true)
@@ -89,20 +101,25 @@ public class JobService {
     }
     
     @Transactional
-    public JobDto completeJob(Long jobId) {
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new NoSuchElementException("Job not found with id: " + jobId));
-        
+    public JobDto completeJob(Long projectId, Long taskId, Long jobId) {
+        Task task = taskRepository.findByIdAndProjectId(taskId, projectId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found under project"));
+
+        Job job = jobRepository.findByIdAndTaskId(jobId, taskId)
+                .orElseThrow(() -> new NoSuchElementException("Job not found under task"));
+
         job.complete();
-        Job savedJob = jobRepository.save(job);
-        return JobDto.from(savedJob);
+        return JobDto.from(jobRepository.save(job));
     }
-    
+
     @Transactional
-    public JobDto reopenJob(Long jobId) {
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new NoSuchElementException("Job not found with id: " + jobId));
-        
+    public JobDto reopenJob(Long projectId, Long taskId, Long jobId) {
+        Task task = taskRepository.findByIdAndProjectId(taskId, projectId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found under project"));
+
+        Job job = jobRepository.findByIdAndTaskId(jobId, taskId)
+                .orElseThrow(() -> new NoSuchElementException("Job not found under task"));
+
         job.reopen();
         Job savedJob = jobRepository.save(job);
         return JobDto.from(savedJob);

@@ -11,21 +11,33 @@ import java.time.LocalDateTime;
 public class Job {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "job_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")
     private Task task;
 
+    @Column(name = "name", length = 128)
     private String name;
+    
+    @Column(name = "assigned_user", length = 128)
     private String assignedUser;
 
     @Lob
+    @Column(name = "description")
     private String description;
 
+    @Column(name = "start_time")
     private LocalDateTime startTime;
+    
+    @Column(name = "end_time")
     private LocalDateTime endTime;
+    
+    @Column(name = "completion_time")
     private LocalDateTime completionTime;
+    
+    @Column(name = "completed")
     private boolean completed;
     
     public Job(Long id, Task task, String name, String assignedUser, String description,

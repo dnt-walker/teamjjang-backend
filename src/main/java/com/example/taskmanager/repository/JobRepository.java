@@ -6,8 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface JobRepository extends JpaRepository<Job, Long> {
+
+    // 기존 코드 아래에 추가
+    Optional<Job> findByIdAndTaskId(Long jobId, Long taskId);
 
     List<Job> findByTaskId(Long taskId);
     

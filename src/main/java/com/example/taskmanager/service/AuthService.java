@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -65,18 +66,27 @@ public class AuthService {
         
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
-        
+        String refreshToken = jwtUtils.generateRefreshToken(authentication);
+
         User user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "username", loginRequest.getUsername()));
-        
+        user.setRefreshToken(refreshToken);
+        user.setRefreshTokenExpiry(LocalDateTime.now().plusDays(7));
+        userRepository.save(user);
+
+        Set<String> roles = user.getRoles(); // Assuming getRoles() returns Set<String>
+
         return new JwtResponseDto(
-                jwt,
+                jwt,                      // accessToken
+                refreshToken,             // refreshToken
+                "Bearer",                 // tokenType
                 user.getId(),
                 user.getUsername(),
-                user.getEmail()
+                user.getEmail(),
+                roles
         );
     }
-    
+
     public UserDto getUserInfo(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
@@ -92,4 +102,34 @@ public class AuthService {
             user.getFullName()
         );
     }
+
+    public JwtResponseDto refreshAccessToken(String refreshToken) {
+        if (!jwtUtils.validateJwtToken(refreshToken)) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+
+        String username = jwtUtils.getUserNameFromJwtToken(refreshToken);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
+
+        String newAccessToken = jwtUtils.generateJwtTokenFromUsername(username);
+
+        return new JwtResponseDto(
+                newAccessToken,
+                refreshToken,
+                "Bearer",
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRoles()
+        );
+    }
+
+    public void invalidateRefreshToken(String refreshToken) {
+        userRepository.findByRefreshToken(refreshToken).ifPresent(user -> {
+            user.setRefreshToken(null);
+            userRepository.save(user);
+        });
+    }
+
 }

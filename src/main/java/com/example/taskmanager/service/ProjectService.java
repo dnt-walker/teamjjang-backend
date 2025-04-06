@@ -19,7 +19,24 @@ import java.util.stream.Collectors;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
-    
+    private final TaskService taskService;
+
+    /**
+     * QueryDSL을 사용하여 프로젝트를 동적으로 검색합니다.
+     * 
+     * @param active 활성 상태 필터링
+     * @param manager 담당자 필터링
+     * @param hasTasks 태스크 존재 여부 필터링
+     * @param upcoming 예정된 프로젝트 필터링
+     * @return 필터링된 ProjectDto 목록
+     */
+    @Transactional(readOnly = true)
+    public List<ProjectDto> searchProjects(Boolean active, String manager, Boolean hasTasks, Boolean upcoming) {
+        return projectRepository.searchProjects(active, manager, hasTasks, upcoming).stream()
+                .map(ProjectDto::from)
+                .collect(Collectors.toList());
+    }
+
     // 모든 프로젝트 조회
     @Transactional(readOnly = true)
     public List<ProjectDto> getAllProjects() {
@@ -37,12 +54,18 @@ public class ProjectService {
     }
     
     // ID로 프로젝트 조회 (태스크 포함)
-    @Transactional(readOnly = true)
-    public ProjectDto getProjectWithTasksById(Long id) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Project not found with id: " + id));
-        return ProjectDto.fromWithTasks(project);
-    }
+//    @Transactional(readOnly = true)
+//    public ProjectDto getProjectWithTasksById(Long id) {
+//        Project project = projectRepository.findById(id)
+//                .orElseThrow(() -> new NoSuchElementException("Project not found with id: " + id));
+//
+//        // TaskService를 통해 태스크 조회
+//        ProjectDto projectDto = ProjectDto.from(project);
+//        List<TaskDto> tasks = taskService.getTasksByProjectId(id);
+//        projectDto.setTasks(tasks);
+//
+//        return projectDto;
+//    }
     
     // ID로 프로젝트 조회 (태스크 미포함)
     @Transactional(readOnly = true)
@@ -105,53 +128,8 @@ public class ProjectService {
     public void deleteProject(Long id) {
         projectRepository.deleteById(id);
     }
-    
-    // 태스크를 프로젝트에 추가
-    @Transactional
-    public ProjectDto addTaskToProject(Long projectId, TaskDto taskDto) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new NoSuchElementException("Project not found with id: " + projectId));
-        
-        Task task = taskDto.toEntity();
-        task.setProject(project);
-        taskRepository.save(task);
-        
-        return ProjectDto.fromWithTasks(project);
-    }
-    
-    // 프로젝트의 특정 태스크 조회
-    @Transactional(readOnly = true)
-    public TaskDto getTaskFromProject(Long projectId, Long taskId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new NoSuchElementException("Project not found with id: " + projectId));
-        
-        Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new NoSuchElementException("Task not found with id: " + taskId));
-        
-        if (task.getProject() == null || !task.getProject().getId().equals(projectId)) {
-            throw new IllegalArgumentException("Task does not belong to the specified project");
-        }
-        
-        return TaskDto.from(task);
-    }
-    
-    // 프로젝트에서 태스크 제거
-    @Transactional
-    public void removeTaskFromProject(Long projectId, Long taskId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new NoSuchElementException("Project not found with id: " + projectId));
-        
-        Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new NoSuchElementException("Task not found with id: " + taskId));
-        
-        if (task.getProject() != null && task.getProject().getId().equals(projectId)) {
-            task.setProject(null);
-            taskRepository.save(task);
-        } else {
-            throw new IllegalArgumentException("Task does not belong to the specified project");
-        }
-    }
-    
+
+
     // 담당자별 프로젝트 조회
     @Transactional(readOnly = true)
     public List<ProjectDto> getProjectsByManager(String manager) {
@@ -159,20 +137,6 @@ public class ProjectService {
                 .map(ProjectDto::from)
                 .collect(Collectors.toList());
     }
-    
-    // 태스크가 있는 프로젝트 조회
-    @Transactional(readOnly = true)
-    public List<ProjectDto> getProjectsWithTasks() {
-        return projectRepository.findProjectsWithTasks().stream()
-                .map(ProjectDto::from)
-                .collect(Collectors.toList());
-    }
-    
-    // 향후 시작 예정인 프로젝트 조회
-    @Transactional(readOnly = true)
-    public List<ProjectDto> getUpcomingProjects() {
-        return projectRepository.findUpcomingProjects().stream()
-                .map(ProjectDto::from)
-                .collect(Collectors.toList());
-    }
+
+
 }

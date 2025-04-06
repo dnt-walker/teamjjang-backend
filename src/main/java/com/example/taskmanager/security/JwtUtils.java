@@ -60,4 +60,24 @@ public class JwtUtils {
             return false;
         }
     }
+
+    public String generateJwtTokenFromUsername(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+    }
+
+    public String generateRefreshToken(Authentication authentication) {
+        UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
+        return Jwts.builder()
+                .setSubject(userPrincipal.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs * 7L)) // Example: 7x access token time
+                .signWith(key)
+                .compact();
+    }
+
 }

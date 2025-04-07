@@ -4,6 +4,8 @@ import com.example.taskmanager.dto.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "jobs")
@@ -22,8 +24,10 @@ public class Job {
     @Column(name = "name", length = 128)
     private String name;
     
-    @Column(name = "assigned_user", length = 128)
-    private String assignedUser;
+    @ElementCollection
+    @CollectionTable(name = "job_assignees", joinColumns = @JoinColumn(name = "job_id"))
+    @Column(name = "assigned_user")
+    private Set<String> assignedUsers = new HashSet<>();
 
     @Lob
     @Column(name = "description")
@@ -41,16 +45,16 @@ public class Job {
     @Column(name = "completed")
     private boolean completed;
     
-    @Column(name = "status", length = 1)
+    @Column(name = "status", length = 2)
     @Convert(converter = StatusConverter.class)
     private Status status;
     
-    public Job(Long id, Task task, String name, String assignedUser, String description,
+    public Job(Long id, Task task, String name, Set<String> assignedUsers, String description,
               LocalDateTime startTime, LocalDateTime endTime, LocalDateTime completionTime, boolean completed, Status status) {
         this.id = id;
         this.task = task;
         this.name = name != null ? name : "";
-        this.assignedUser = assignedUser;
+        this.assignedUsers = assignedUsers != null ? assignedUsers : new HashSet<>();
         this.description = description;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -112,13 +116,37 @@ public class Job {
         return Status.CREATED.equals(this.status);
     }
     
+    // 담당자 추가 메서드
+    public void addAssignedUser(String user) {
+        this.assignedUsers.add(user);
+    }
+    
+    // 담당자 제거 메서드
+    public void removeAssignedUser(String user) {
+        this.assignedUsers.remove(user);
+    }
+    
+    // 담당자 설정 메서드
+    public void setAssignedUsers(Set<String> users) {
+        this.assignedUsers.clear();
+        if (users != null) {
+            this.assignedUsers.addAll(users);
+        }
+    }
+    
     // 속성 업데이트 메서드
-    public void update(String name, String assignedUser, String description, 
+    public void update(String name, Set<String> assignedUsers, String description, 
                       LocalDateTime startTime, LocalDateTime endTime) {
         if (name != null) this.name = name;
-        if (assignedUser != null) this.assignedUser = assignedUser;
+        if (assignedUsers != null) this.setAssignedUsers(assignedUsers);
         if (description != null) this.description = description;
         if (startTime != null) this.startTime = startTime;
         if (endTime != null) this.endTime = endTime;
+    }
+    
+    // 이전 버전과의 호환성을 위한 메서드 (단일 사용자 반환)
+    @Deprecated
+    public String getAssignedUser() {
+        return this.assignedUsers.isEmpty() ? null : this.assignedUsers.iterator().next();
     }
 }

@@ -5,6 +5,8 @@ import com.example.taskmanager.domain.Task;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -19,8 +21,8 @@ public class JobDto {
     @Schema(description = "작업명", example = "API 설계")
     private String name;
 
-    @Schema(description = "담당자", example = "johndoe")
-    private String assignedUser;
+    @Schema(description = "담당자 목록", example = "['john.doe', 'jane.smith']")
+    private Set<String> assignedUsers = new HashSet<>();
 
     @Schema(description = "작업 설명", example = "Spring Boot 기반 API 설계")
     private String description;
@@ -40,11 +42,20 @@ public class JobDto {
     @Schema(description = "작업 상태", example = "IN_PROGRESS")
     private Status status;
 
+    // 이전 버전과의 호환성을 위한 필드
+    @Deprecated
+    @Schema(description = "단일 담당자 (하위 호환용, 새로운 구현에서는 assignedUsers 사용)", example = "johndoe", deprecated = true)
+    private String assignedUser;
+
     public static JobDto from(Job job) {
         JobDto dto = new JobDto();
         dto.setId(job.getId());
         dto.setName(job.getName());
-        dto.setAssignedUser(job.getAssignedUser());
+        dto.setAssignedUsers(job.getAssignedUsers());
+        // 이전 버전과의 호환성을 위해 첫 번째 담당자를 assignedUser에 설정
+        if (!job.getAssignedUsers().isEmpty()) {
+            dto.setAssignedUser(job.getAssignedUsers().iterator().next());
+        }
         dto.setDescription(job.getDescription());
         dto.setStartTime(job.getStartTime());
         dto.setEndTime(job.getEndTime());
@@ -55,11 +66,18 @@ public class JobDto {
     }
 
     public Job toEntity(Task task) {
+        Set<String> users = new HashSet<>(this.assignedUsers);
+        
+        // 이전 버전과의 호환성: assignedUser가 설정되어 있고 assignedUsers가 비어있으면 추가
+        if (this.assignedUser != null && !this.assignedUser.isEmpty() && this.assignedUsers.isEmpty()) {
+            users.add(this.assignedUser);
+        }
+        
         return new Job(
             this.id,
             task,
             this.name,
-            this.assignedUser,
+            users,
             this.description,
             this.startTime,
             this.endTime,

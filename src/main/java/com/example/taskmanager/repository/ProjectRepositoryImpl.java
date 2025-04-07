@@ -12,7 +12,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDate;
 import java.util.List;
 
-public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
+public class ProjectRepositoryImpl implements ProjectRepositoryCustom {
 
     @PersistenceContext
     private EntityManager entityManager;

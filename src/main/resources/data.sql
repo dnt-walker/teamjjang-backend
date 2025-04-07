@@ -98,27 +98,64 @@ SELECT task_id, 'admin' FROM tasks WHERE task_id = 10;
 INSERT INTO task_assignees (task_id, assignee) 
 SELECT task_id, 'user' FROM tasks WHERE task_id = 10;
 
--- Jobs for Tasks
-INSERT INTO jobs (task_id, name, assigned_user, description, start_time, end_time, completed)
-SELECT task_id, '고객 인터뷰', 'admin', '주요 고객 5명과 인터뷰 진행', '2025-04-02 10:00:00', '2025-04-05 18:00:00', true
+-- Jobs for Tasks (컬럼 변경에 맞추어 수정)
+-- assigned_user 컬럼이 아닌 별도의 job_assignees 테이블에 삽입합니다
+INSERT INTO jobs (task_id, name, description, start_time, end_time, completed, status)
+SELECT task_id, '고객 인터뷰', '주요 고객 5명과 인터뷰 진행', '2025-04-02 10:00:00', '2025-04-05 18:00:00', true, 'FS'
 FROM tasks WHERE task_id = 1;
 
-INSERT INTO jobs (task_id, name, assigned_user, description, start_time, end_time, completed)
-SELECT task_id, '요구사항 문서 작성', 'user', '수집된 요구사항 정리 및 문서화', '2025-04-06 09:00:00', '2025-04-15 17:00:00', false
+-- 작업별 담당자 추가 (job_id 1번에 담당자 admin 추가)
+INSERT INTO job_assignees (job_id, assigned_user)
+VALUES (1, 'admin');
+
+INSERT INTO jobs (task_id, name, description, start_time, end_time, completed, status)
+SELECT task_id, '요구사항 문서 작성', '수집된 요구사항 정리 및 문서화', '2025-04-06 09:00:00', '2025-04-15 17:00:00', false, 'IP'
 FROM tasks WHERE task_id = 1;
 
-INSERT INTO jobs (task_id, name, assigned_user, description, start_time, end_time, completed)
-SELECT task_id, '와이어프레임 디자인', 'admin', '주요 화면 와이어프레임 설계', '2025-04-16 09:00:00', '2025-04-30 17:00:00', false
+-- 작업별 담당자 추가 (job_id 2번에 담당자 user 추가)
+INSERT INTO job_assignees (job_id, assigned_user)
+VALUES (2, 'user');
+
+INSERT INTO jobs (task_id, name, description, start_time, end_time, completed, status)
+SELECT task_id, '와이어프레임 디자인', '주요 화면 와이어프레임 설계', '2025-04-16 09:00:00', '2025-04-30 17:00:00', false, 'CT'
 FROM tasks WHERE task_id = 2;
 
-INSERT INTO jobs (task_id, name, assigned_user, description, start_time, end_time, completed)
-SELECT task_id, 'API 설계', 'user', 'RESTful API 설계 및 문서화', '2025-05-01 09:00:00', '2025-05-15 17:00:00', false
+-- 작업별 담당자 추가 (job_id 3번에 담당자 admin 추가)
+INSERT INTO job_assignees (job_id, assigned_user)
+VALUES (3, 'admin');
+
+INSERT INTO jobs (task_id, name, description, start_time, end_time, completed, status)
+SELECT task_id, 'API 설계', 'RESTful API 설계 및 문서화', '2025-05-01 09:00:00', '2025-05-15 17:00:00', false, 'CT'
 FROM tasks WHERE task_id = 3;
 
-INSERT INTO jobs (task_id, name, assigned_user, description, start_time, end_time, completed)
-SELECT task_id, '사용자 피드백 수집', 'admin', '현행 앱에 대한 사용자 의견 취합', '2025-04-15 09:00:00', '2025-04-22 17:00:00', false
+-- 작업별 담당자 추가 (job_id 4번에 담당자 user 추가)
+INSERT INTO job_assignees (job_id, assigned_user)
+VALUES (4, 'user');
+
+INSERT INTO jobs (task_id, name, description, start_time, end_time, completed, status)
+SELECT task_id, '사용자 피드백 수집', '현행 앱에 대한 사용자 의견 취합', '2025-04-15 09:00:00', '2025-04-22 17:00:00', false, 'WT'
 FROM tasks WHERE task_id = 5;
 
-INSERT INTO jobs (task_id, name, assigned_user, description, start_time, end_time, completed)
-SELECT task_id, '데이터베이스 쿼리 로그 분석', 'user', '느린 쿼리 식별 및 병목 현상 분석', '2025-05-01 09:00:00', '2025-05-10 17:00:00', false
+-- 작업별 담당자 추가 (job_id 5번에 담당자 admin 추가)
+INSERT INTO job_assignees (job_id, assigned_user)
+VALUES (5, 'admin');
+
+INSERT INTO jobs (task_id, name, description, start_time, end_time, completed, status)
+SELECT task_id, '데이터베이스 쿼리 로그 분석', '느린 쿼리 식별 및 병목 현상 분석', '2025-05-01 09:00:00', '2025-05-10 17:00:00', false, 'CT'
 FROM tasks WHERE task_id = 8;
+
+-- 작업별 담당자 추가 (job_id 6번에 담당자 user 추가)
+INSERT INTO job_assignees (job_id, assigned_user)
+VALUES (6, 'user');
+
+-- 여러 담당자를 가진 작업 예제 추가
+INSERT INTO jobs (task_id, name, description, start_time, end_time, completed, status)
+SELECT task_id, '프로젝트 킥오프 미팅', '프로젝트 시작을 위한 팀 전체 회의', '2025-04-01 10:00:00', '2025-04-01 12:00:00', true, 'FS'
+FROM tasks WHERE task_id = 1;
+
+-- 작업별 담당자 추가 (job_id 7번에 담당자 여러 명 추가)
+INSERT INTO job_assignees (job_id, assigned_user)
+VALUES (7, 'admin');
+
+INSERT INTO job_assignees (job_id, assigned_user)
+VALUES (7, 'user');

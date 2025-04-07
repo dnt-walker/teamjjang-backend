@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
+public class TaskRepositoryImpl implements TaskRepositoryCustom {
 
     @PersistenceContext
     private EntityManager entityManager;

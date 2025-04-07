@@ -8,14 +8,14 @@ import java.util.Arrays;
 
 @Getter
 public enum Status {
-    CREATED("C", "created"),
-    WAITING("W", "waiting"),
-    // todo
-    IN_PROGRESS("P", "in-process"),
-    SUCCEEDED("S", "succeeded"),
-    FAILED("F", "failed"),
-    FINISHED("E", "finished"),
-    REMOVED("R", "removed");
+    CREATED("CT", "created"),
+    WAITING("WT", "waiting"),
+    CANCEL("CC", "cancel"),
+    IN_PROGRESS("IP", "in-process"),
+    SUCCEEDED("SC", "succeeded"),
+    FAILED("FL", "failed"),
+    FINISHED("FS", "finished"),
+    REMOVED("RM", "removed");
 
     private final String statusCode;
     private final String statusName;

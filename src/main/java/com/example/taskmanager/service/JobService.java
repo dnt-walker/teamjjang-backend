@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -37,8 +36,8 @@ public class JobService {
     }
     
     @Transactional(readOnly = true)
-    public List<JobDto> getJobsByAssignedUser(String assignedUser) {
-        return jobRepository.findByAssignedUser(assignedUser).stream()
+    public List<JobDto> getJobsByAssignedUser(String username) {
+        return jobRepository.findByAssignedUsersContaining(username).stream()
                 .map(JobDto::from)
                 .collect(Collectors.toList());
     }
@@ -74,7 +73,7 @@ public class JobService {
 
         job.update(
             jobDto.getName(),
-            jobDto.getAssignedUser(),
+            jobDto.getAssignedUsers(),
             jobDto.getDescription(),
             jobDto.getStartTime(),
             jobDto.getEndTime()
@@ -139,6 +138,32 @@ public class JobService {
         
         // 상태에 따라 완료 여부 업데이트
         job.updateCompletionByStatus();
+        
+        return JobDto.from(jobRepository.save(job));
+    }
+    
+    @Transactional
+    public JobDto addUserToJob(Long projectId, Long taskId, Long jobId, String username) {
+        Task task = taskRepository.findByIdAndProjectId(taskId, projectId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found under project"));
+
+        Job job = jobRepository.findByIdAndTaskId(jobId, taskId)
+                .orElseThrow(() -> new NoSuchElementException("Job not found under task"));
+        
+        job.addAssignedUser(username);
+        
+        return JobDto.from(jobRepository.save(job));
+    }
+    
+    @Transactional
+    public JobDto removeUserFromJob(Long projectId, Long taskId, Long jobId, String username) {
+        Task task = taskRepository.findByIdAndProjectId(taskId, projectId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found under project"));
+
+        Job job = jobRepository.findByIdAndTaskId(jobId, taskId)
+                .orElseThrow(() -> new NoSuchElementException("Job not found under task"));
+        
+        job.removeAssignedUser(username);
         
         return JobDto.from(jobRepository.save(job));
     }

@@ -91,4 +91,32 @@ public class JobController {
         jobService.removeJob(projectId, taskId, id);
         return ResponseEntity.noContent().build();
     }
+    
+    // 담당자 추가 API 엔드포인트
+    @PostMapping("/{id}/assignees/{username}")
+    @Operation(summary = "작업 담당자 추가", description = "특정 작업에 담당자를 추가합니다.")
+    public ResponseEntity<JobDto> addAssignee(
+            @PathVariable @Parameter(description = "프로젝트 ID") Long projectId,
+            @PathVariable @Parameter(description = "태스크 ID") Long taskId,
+            @PathVariable @Parameter(description = "작업 ID") Long id,
+            @PathVariable @Parameter(description = "추가할 담당자 사용자명") String username,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        JobDto updatedJob = jobService.addUserToJob(projectId, taskId, id, username);
+        return ResponseEntity.ok(updatedJob);
+    }
+    
+    // 담당자 제거 API 엔드포인트
+    @DeleteMapping("/{id}/assignees/{username}")
+    @Operation(summary = "작업 담당자 제거", description = "특정 작업에서 담당자를 제거합니다.")
+    public ResponseEntity<JobDto> removeAssignee(
+            @PathVariable @Parameter(description = "프로젝트 ID") Long projectId,
+            @PathVariable @Parameter(description = "태스크 ID") Long taskId,
+            @PathVariable @Parameter(description = "작업 ID") Long id,
+            @PathVariable @Parameter(description = "제거할 담당자 사용자명") String username,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        JobDto updatedJob = jobService.removeUserFromJob(projectId, taskId, id, username);
+        return ResponseEntity.ok(updatedJob);
+    }
 }

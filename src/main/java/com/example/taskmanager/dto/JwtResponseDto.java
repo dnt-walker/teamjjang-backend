@@ -2,6 +2,7 @@ package com.example.taskmanager.dto;
 
 import lombok.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -17,7 +18,8 @@ public class JwtResponseDto {
     private String email;
     private Set<String> roles;
 
-    public JwtResponseDto(String accessToken, String refreshToken, Long id, String username, String email, Set<String> roles) {
+    public JwtResponseDto(String accessToken, String refreshToken, Long id, String username, String email,
+                          Set<String> roles) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.id = id;

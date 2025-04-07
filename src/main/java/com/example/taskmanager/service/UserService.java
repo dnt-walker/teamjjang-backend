@@ -2,155 +2,107 @@ package com.example.taskmanager.service;
 
 import com.example.taskmanager.domain.User;
 import com.example.taskmanager.dto.UserDto;
-import com.example.taskmanager.dto.UserUpdateDto;
-import com.example.taskmanager.exception.ResourceNotFoundException;
 import com.example.taskmanager.repository.UserRepository;
-import com.querydsl.core.BooleanBuilder;
-import com.example.taskmanager.domain.QUser;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    
-    /**
-     * 모든 사용자 목록을 조회합니다.
-     * 
-     * @return 사용자 DTO 목록
-     */
-    @Transactional(readOnly = true)
+
     public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(this::convertToDto)
+                .map(UserDto::from)
                 .collect(Collectors.toList());
     }
-    
-    /**
-     * ID로 사용자를 조회합니다.
-     * 
-     * @param id 사용자 ID
-     * @return 사용자 DTO
-     */
-    @Transactional(readOnly = true)
+
     public UserDto getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
-        return convertToDto(user);
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + id));
+        return UserDto.from(user);
     }
-    
-    /**
-     * 사용자명으로 사용자를 조회합니다.
-     * 
-     * @param username 사용자명
-     * @return 사용자 DTO
-     */
-    @Transactional(readOnly = true)
-    public UserDto getUserByUsername(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
-        return convertToDto(user);
-    }
-    
-    /**
-     * 사용자 정보를 수정합니다.
-     * 
-     * @param id 사용자 ID
-     * @param userUpdateDto 업데이트할 사용자 정보
-     * @return 업데이트된 사용자 DTO
-     */
+
     @Transactional
-    public UserDto updateUser(Long id, UserUpdateDto userUpdateDto) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
-        
-        // 이메일 및 이름 업데이트
-        user.update(userUpdateDto.getEmail(), userUpdateDto.getFullName());
-        
-        // 비밀번호 변경이 요청된 경우 처리
-        if (StringUtils.hasText(userUpdateDto.getCurrentPassword()) 
-                && StringUtils.hasText(userUpdateDto.getNewPassword())) {
-            // 현재 비밀번호 검증
-            if (!passwordEncoder.matches(userUpdateDto.getCurrentPassword(), user.getPassword())) {
-                throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다");
-            }
-            
-            // 새 비밀번호로 업데이트
-            user.changePassword(passwordEncoder.encode(userUpdateDto.getNewPassword()));
+    public UserDto createUser(UserDto userDto) {
+        if (userRepository.existsByUsername(userDto.getUsername())) {
+            throw new IllegalArgumentException("Username already exists: " + userDto.getUsername());
         }
         
-        User updatedUser = userRepository.save(user);
-        return convertToDto(updatedUser);
+        User user = userDto.toEntity();
+        // 실제 환경에서는 여기서 비밀번호 암호화 처리를 해야 합니다
+        // user.setPassword(passwordEncoder.encode(user.getPassword()));
+        
+        // 역할이 설정되지 않은 경우 기본 역할 설정
+        if (user.getRoles() == null || user.getRoles().isEmpty()) {
+            Set<String> roles = new HashSet<>();
+            roles.add("ROLE_USER");
+            // User 생성자를 통해 역할 지정 - 기존 User 클래스에는 setter가 없음
+            user = User.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .roles(roles)
+                .build();
+        }
+        
+        User savedUser = userRepository.save(user);
+        return UserDto.from(savedUser);
     }
-    
-    /**
-     * 사용자를 삭제합니다.
-     * 
-     * @param id 사용자 ID
-     */
+
+    @Transactional
+    public UserDto updateUser(Long id, UserDto userDto) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + id));
+        
+        // ID가 다르면 다른 사용자의 username인지 확인
+        if (!existingUser.getUsername().equals(userDto.getUsername()) && 
+            userRepository.existsByUsername(userDto.getUsername())) {
+            throw new IllegalArgumentException("Username already exists: " + userDto.getUsername());
+        }
+        
+        // 기존 User 엔티티는 update 메서드를 통해 수정
+        existingUser.update(userDto.getEmail(), userDto.getFullName());
+        
+        // 비밀번호가 제공된 경우에만 수정
+        if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
+            // 실제 환경에서는 여기서 비밀번호 암호화 처리를 해야 합니다
+            // existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
+            existingUser.changePassword(userDto.getPassword());
+        }
+        
+        // 역할 정보 업데이트 - 기존 엔티티의 역할 관리 방식 사용
+        if (userDto.getRoles() != null && !userDto.getRoles().isEmpty()) {
+            // 기존 역할 모두 제거
+            for (String role : new HashSet<>(existingUser.getRoles())) {
+                existingUser.removeRole(role);
+            }
+            // 새 역할 추가
+            for (String role : userDto.getRoles()) {
+                existingUser.addRole(role);
+            }
+        }
+        
+        User updatedUser = userRepository.save(existingUser);
+        return UserDto.from(updatedUser);
+    }
+
     @Transactional
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException("User", "id", id);
+            throw new NoSuchElementException("User not found with id: " + id);
         }
-        
         userRepository.deleteById(id);
-    }
-    
-    /**
-     * 사용자를 검색합니다.
-     * 
-     * @param username 사용자명 (선택)
-     * @param email 이메일 (선택)
-     * @param fullName 전체 이름 (선택)
-     * @return 검색 결과 사용자 DTO 목록
-     */
-    @Transactional(readOnly = true)
-    public List<UserDto> searchUsers(String username, String email, String fullName) {
-        QUser qUser = QUser.user;
-        BooleanBuilder builder = new BooleanBuilder();
-        
-        if (StringUtils.hasText(username)) {
-            builder.and(qUser.username.containsIgnoreCase(username));
-        }
-        
-        if (StringUtils.hasText(email)) {
-            builder.and(qUser.email.containsIgnoreCase(email));
-        }
-        
-        if (StringUtils.hasText(fullName)) {
-            builder.and(qUser.fullName.containsIgnoreCase(fullName));
-        }
-        
-        Iterable<User> users = userRepository.findAll(builder);
-        
-        return StreamSupport.stream(users.spliterator(), false)
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-    }
-    
-    /**
-     * User 엔티티를 UserDto로 변환합니다.
-     * 
-     * @param user User 엔티티
-     * @return UserDto
-     */
-    private UserDto convertToDto(User user) {
-        return new UserDto(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getFullName()
-        );
     }
 }

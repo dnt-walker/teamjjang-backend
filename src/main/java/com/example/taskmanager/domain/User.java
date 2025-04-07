@@ -43,6 +43,7 @@ public class User {
     @Column(name = "refresh_token_expiry")
     private LocalDateTime refreshTokenExpiry;
 
+    @Builder
     public User(Long id, String username, String password, String email, String fullName, Set<String> roles) {
         this.id = id;
         this.username = username;
@@ -90,5 +91,22 @@ public class User {
                 ", email='" + email + '\'' +
                 ", fullName='" + fullName + '\'' +
                 '}';
+    }
+    
+    // 추가 필드의 getter/setter 호환성을 위한 메서드
+    public String getName() {
+        return this.fullName;
+    }
+    
+    public boolean isActive() {
+        return true; // 기본적으로 모든 사용자는 활성 상태
+    }
+    
+    public String getDepartment() {
+        return null; // 기존 엔티티에 없는 필드
+    }
+    
+    public String getPosition() {
+        return null; // 기존 엔티티에 없는 필드
     }
 }

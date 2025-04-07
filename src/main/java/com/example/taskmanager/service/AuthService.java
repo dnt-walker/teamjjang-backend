@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -46,14 +48,13 @@ public class AuthService {
         Set<String> roles = new HashSet<>();
         roles.add("ROLE_USER");
         
-        User user = new User(
-            null,
-            signupRequest.getUsername(),
-            passwordEncoder.encode(signupRequest.getPassword()),
-            signupRequest.getEmail(),
-            signupRequest.getFullName(),
-            roles
-        );
+        User user = User.builder()
+            .username(signupRequest.getUsername())
+            .password(passwordEncoder.encode(signupRequest.getPassword()))
+            .email(signupRequest.getEmail())
+            .fullName(signupRequest.getFullName())
+            .roles(roles)
+            .build();
         
         User savedUser = userRepository.save(user);
         
@@ -74,7 +75,7 @@ public class AuthService {
         user.setRefreshTokenExpiry(LocalDateTime.now().plusDays(7));
         userRepository.save(user);
 
-        Set<String> roles = user.getRoles(); // Assuming getRoles() returns Set<String>
+        Set<String> roles = user.getRoles();
 
         return new JwtResponseDto(
                 jwt,                      // accessToken
@@ -95,12 +96,14 @@ public class AuthService {
     }
     
     private UserDto convertToDto(User user) {
-        return new UserDto(
-            user.getId(),
-            user.getUsername(),
-            user.getEmail(),
-            user.getFullName()
-        );
+        return UserDto.builder()
+            .id(user.getId())
+            .username(user.getUsername())
+            .email(user.getEmail())
+            .fullName(user.getFullName())
+            .active(user.isActive())
+            .roles(user.getRoles())
+            .build();
     }
 
     public JwtResponseDto refreshAccessToken(String refreshToken) {

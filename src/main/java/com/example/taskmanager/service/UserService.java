@@ -4,6 +4,7 @@ import com.example.taskmanager.domain.User;
 import com.example.taskmanager.dto.UserDto;
 import com.example.taskmanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream()
@@ -37,11 +39,11 @@ public class UserService {
         if (userRepository.existsByUsername(userDto.getUsername())) {
             throw new IllegalArgumentException("Username already exists: " + userDto.getUsername());
         }
-        
-        User user = userDto.toEntity();
+
         // 실제 환경에서는 여기서 비밀번호 암호화 처리를 해야 합니다
-        // user.setPassword(passwordEncoder.encode(user.getPassword()));
-        
+        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        User user = userDto.toEntity();
+
         // 역할이 설정되지 않은 경우 기본 역할 설정
         if (user.getRoles() == null || user.getRoles().isEmpty()) {
             Set<String> roles = new HashSet<>();

@@ -58,7 +58,11 @@ public class TeamUserDetails implements UserDetails, Serializable {
 
     @Override
     public String getUsername() {
-        return user.getName();
+        return user.getUsername();
+    }
+
+    public String getFullName() {
+        return user.getFullName();
     }
 
     @Override

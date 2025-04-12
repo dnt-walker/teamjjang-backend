@@ -94,9 +94,9 @@ public class User {
     }
     
     // 추가 필드의 getter/setter 호환성을 위한 메서드
-    public String getName() {
-        return this.fullName;
-    }
+//    public String getName() {
+//        return this.fullName;
+//    }
     
     public boolean isActive() {
         return true; // 기본적으로 모든 사용자는 활성 상태

@@ -16,14 +16,14 @@ public class TaskAssignedUser extends RegisteredEntity implements Serializable {
     @EmbeddedId
     private TaskAssignedUserId id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "user_id",
             foreignKey = @ForeignKey(name = "FK_assigned_task_user_id")
     )
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("taskId")
     @JoinColumn(name = "task_id",
             foreignKey = @ForeignKey(name = "FK_assigned_task_id")

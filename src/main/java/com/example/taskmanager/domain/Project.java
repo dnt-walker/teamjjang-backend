@@ -59,7 +59,8 @@ public class Project extends ModifiedEntity implements Serializable {
     @JsonIgnore
     private User manager;
 
-    @Column(name = "project_status")
+    @Column(name = "project_status", length = 2)
+    @Convert(converter = JobStatusConverter.class)
     private JobStatus status;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)

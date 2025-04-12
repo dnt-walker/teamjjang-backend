@@ -16,7 +16,7 @@ public class UserDto {
     @Schema(description = "사용자 ID", example = "1")
     private Long id;
     
-    @Schema(description = "사용자명", example = "john.doe")
+    @Schema(description = "문자 사용자 ID", example = "john.doe")
     private String username;
     
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

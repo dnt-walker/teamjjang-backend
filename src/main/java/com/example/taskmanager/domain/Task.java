@@ -69,7 +69,7 @@ public class Task extends ModifiedEntity implements Serializable {
 
     // 태스크 상태 (Status 열거형, 변환기 사용)
     @Column(name = "task_status", length = 2)
-    @Convert(converter = TaskStatusConverter.class)
+    @Convert(converter = JobStatusConverter.class)
     private JobStatus status;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)

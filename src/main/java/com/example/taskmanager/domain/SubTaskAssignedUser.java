@@ -16,7 +16,7 @@ public class SubTaskAssignedUser extends RegisteredEntity implements Serializabl
     @EmbeddedId
     private SubTaskAssignedUserId id ;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "user_id"
             ,foreignKey = @ForeignKey(name = "FK_assigned_subtask_user_id")

@@ -8,11 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Converter
-public class TaskStatusConverter implements AttributeConverter<JobStatus, String> {
+public class JobStatusConverter implements AttributeConverter<JobStatus, String> {
     @Generated
-    private static final Logger log = LoggerFactory.getLogger(TaskStatusConverter.class);
+    private static final Logger log = LoggerFactory.getLogger(JobStatusConverter.class);
 
-    public TaskStatusConverter() {
+    public JobStatusConverter() {
     }
 
     public String convertToDatabaseColumn(JobStatus status) {

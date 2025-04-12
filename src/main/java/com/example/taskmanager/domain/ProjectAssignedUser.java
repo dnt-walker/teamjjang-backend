@@ -16,14 +16,14 @@ public class ProjectAssignedUser extends RegisteredEntity implements Serializabl
     @EmbeddedId
     private ProjectAssignedUserId id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "user_id",
             foreignKey = @ForeignKey(name = "FK_assigned_project_user_id")
     )
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("projectId")
     @JoinColumn(name = "project_id",
             foreignKey = @ForeignKey(name = "FK_assigned_project_id")

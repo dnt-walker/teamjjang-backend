@@ -42,7 +42,7 @@ public class SubTask extends ModifiedEntity implements Serializable {
     private LocalDateTime endTime;
 
     @Column(name = "subtask_status", length = 2)
-    @Convert(converter = TaskStatusConverter.class)
+    @Convert(converter = JobStatusConverter.class)
     private JobStatus status;
 
     @Setter

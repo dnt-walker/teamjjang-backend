@@ -101,7 +101,7 @@ public class AuthService {
             .username(user.getUsername())
             .email(user.getEmail())
             .fullName(user.getFullName())
-            .active(user.isActive())
+//            .active(user.isActive())
             .roles(user.getRoles())
             .build();
     }

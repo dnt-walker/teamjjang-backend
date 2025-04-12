@@ -17,46 +17,46 @@ SELECT user_id, 'ROLE_USER' FROM users WHERE username = 'user';
 
 -- Projects
 INSERT INTO projects (name, description, start_date, end_date, manager, active)
-VALUES ('웹 애플리케이션 개발', '고객을 위한 새로운 전자상거래 웹 애플리케이션 개발', '2025-04-01', '2025-08-31', 'admin', true);
+VALUES ('웹 애플리케이션 개발', '고객을 위한 새로운 전자상거래 웹 애플리케이션 개발', '2025-04-01', '2025-08-31', 1, true);
 
 INSERT INTO projects (name, description, start_date, end_date, manager, active)
-VALUES ('모바일 앱 리디자인', '기존 모바일 애플리케이션 UX/UI 개선 프로젝트', '2025-04-15', '2025-07-15', 'admin', true);
+VALUES ('모바일 앱 리디자인', '기존 모바일 애플리케이션 UX/UI 개선 프로젝트', '2025-04-15', '2025-07-15', 1, true);
 
 INSERT INTO projects (name, description, start_date, end_date, manager, active)
-VALUES ('데이터베이스 최적화', '시스템 성능 향상을 위한 데이터베이스 구조 개선', '2025-05-01', '2025-06-30', 'user', true);
+VALUES ('데이터베이스 최적화', '시스템 성능 향상을 위한 데이터베이스 구조 개선', '2025-05-01', '2025-06-30', 2, true);
 
 -- Tasks for Project 1
 INSERT INTO tasks (name, description, start_date, planned_end_date, creator, project_id)
-VALUES ('요구사항 분석', '고객 요구사항 수집 및 분석', '2025-04-01', '2025-04-15', 'admin', 1);
+VALUES ('요구사항 분석', '고객 요구사항 수집 및 분석', '2025-04-01', '2025-04-15', 1, 1);
 
 INSERT INTO tasks (name, description, start_date, planned_end_date, creator, project_id)
-VALUES ('UI/UX 설계', '웹 애플리케이션 UI/UX 디자인 및 프로토타입 개발', '2025-04-16', '2025-05-15', 'admin', 1);
+VALUES ('UI/UX 설계', '웹 애플리케이션 UI/UX 디자인 및 프로토타입 개발', '2025-04-16', '2025-05-15', 1, 1);
 
 INSERT INTO tasks (name, description, start_date, planned_end_date, creator, project_id)
-VALUES ('백엔드 개발', 'API 및 서버 로직 구현', '2025-05-01', '2025-07-15', 'user', 1);
+VALUES ('백엔드 개발', 'API 및 서버 로직 구현', '2025-05-01', '2025-07-15', 2, 1);
 
 INSERT INTO tasks (name, description, start_date, planned_end_date, creator, project_id)
-VALUES ('프론트엔드 개발', '사용자 인터페이스 구현', '2025-05-15', '2025-07-31', 'user', 1);
+VALUES ('프론트엔드 개발', '사용자 인터페이스 구현', '2025-05-15', '2025-07-31', 2, 1);
 
 -- Tasks for Project 2
 INSERT INTO tasks (name, description, start_date, planned_end_date, creator, project_id)
-VALUES ('현행 앱 분석', '기존 모바일 앱 사용성 및 디자인 평가', '2025-04-15', '2025-04-30', 'admin', 2);
+VALUES ('현행 앱 분석', '기존 모바일 앱 사용성 및 디자인 평가', '2025-04-15', '2025-04-30', 1, 2);
 
 INSERT INTO tasks (name, description, start_date, planned_end_date, creator, project_id)
-VALUES ('새로운 디자인 개발', '개선된 UI/UX 디자인 작업', '2025-05-01', '2025-06-15', 'admin', 2);
+VALUES ('새로운 디자인 개발', '개선된 UI/UX 디자인 작업', '2025-05-01', '2025-06-15', 1, 2);
 
 INSERT INTO tasks (name, description, start_date, planned_end_date, creator, project_id)
-VALUES ('개발 및 구현', '디자인 변경사항 코드 구현', '2025-06-01', '2025-07-10', 'user', 2);
+VALUES ('개발 및 구현', '디자인 변경사항 코드 구현', '2025-06-01', '2025-07-10', 2, 2);
 
 -- Tasks for Project 3
 INSERT INTO tasks (name, description, start_date, planned_end_date, creator, project_id)
-VALUES ('데이터베이스 분석', '현재 데이터베이스 성능 평가 및 문제점 파악', '2025-05-01', '2025-05-15', 'user', 3);
+VALUES ('데이터베이스 분석', '현재 데이터베이스 성능 평가 및 문제점 파악', '2025-05-01', '2025-05-15', 2, 3);
 
 INSERT INTO tasks (name, description, start_date, planned_end_date, creator, project_id)
-VALUES ('스키마 개선', '데이터베이스 스키마 재설계 및 최적화', '2025-05-16', '2025-06-15', 'user', 3);
+VALUES ('스키마 개선', '데이터베이스 스키마 재설계 및 최적화', '2025-05-16', '2025-06-15', 2, 3);
 
 INSERT INTO tasks (name, description, start_date, planned_end_date, creator, project_id)
-VALUES ('쿼리 최적화', '주요 쿼리 성능 개선', '2025-06-01', '2025-06-30', 'admin', 3);
+VALUES ('쿼리 최적화', '주요 쿼리 성능 개선', '2025-06-01', '2025-06-30', 1, 3);
 
 -- Task Assignees - task_id는 tasks 테이블의 FK
 INSERT INTO task_assignees (task_id, assignee) 

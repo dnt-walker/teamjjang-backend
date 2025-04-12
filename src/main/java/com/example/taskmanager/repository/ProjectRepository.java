@@ -1,21 +1,47 @@
 package com.example.taskmanager.repository;
 
-import com.example.taskmanager.domain.Job;
 import com.example.taskmanager.domain.Project;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.example.taskmanager.domain.SubTask;
+import com.example.taskmanager.domain.User;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProjectRepository extends JpaRepository<Project, Long>, ProjectRepositoryCustom {
-    // 활성화된 프로젝트만 조회
-    List<Project> findByActiveTrue();
-    
-    // 특정 담당자의 프로젝트 조회
-    List<Project> findByManager(String manager);
-    
-    // 커스텀 쿼리: 특정 날짜 이후에 시작하는 프로젝트 조회
-    @Query("SELECT p FROM Project p WHERE p.startDate >= CURRENT_DATE")
-    List<Project> findUpcomingProjects();
+    @EntityGraph(attributePaths = {
+            "assignedUsers",
+            "manager",
+            "register",
+            "modifier"
+    })
+    @Query("SELECT t FROM Project t " +
+            " JOIN t.assignedUsers u " +
+            " JOIN t.manager a " +
+            " JOIN t.register r " +
+            " JOIN t.modifier m ")
+//    +
+//            " WHERE  ")
+    List<Project> findAll();
+
+    // Task에 속한 SubTask 목록 조회
+    @EntityGraph(attributePaths = {
+            "assignedUsers",
+            "manager",
+            "register",
+            "modifier"
+    })
+    @Query("SELECT t FROM Project t " +
+            " JOIN t.assignedUsers u " +
+            " JOIN t.manager a " +
+            " JOIN t.register r " +
+            " JOIN t.modifier m " +
+            " WHERE t.id = :projectId")
+    Optional<Project> findById(@Param("projectId") Long projectId);
+
+
+
 }

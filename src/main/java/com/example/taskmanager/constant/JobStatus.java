@@ -1,4 +1,4 @@
-package com.example.taskmanager.dto;
+package com.example.taskmanager.constant;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -7,20 +7,18 @@ import lombok.Getter;
 import java.util.Arrays;
 
 @Getter
-public enum Status {
+public enum JobStatus {
     CREATED("CT", "created"),
-    WAITING("WT", "waiting"),
-    CANCEL("CC", "cancel"),
     IN_PROGRESS("IP", "in-process"),
-    SUCCEEDED("SC", "succeeded"),
-    FAILED("FL", "failed"),
+    STOP("ST", "stop"),
+    CANCEL("CC", "cancel"),
     FINISHED("FS", "finished"),
-    REMOVED("RM", "removed");
+    REOPEN("RO", "reopen");
 
     private final String statusCode;
     private final String statusName;
 
-    Status(String statusCode, String statusName) {
+    JobStatus(String statusCode, String statusName) {
         this.statusCode = statusCode;
         this.statusName = statusName;
     }
@@ -30,18 +28,18 @@ public enum Status {
         return this.statusName;
     }
 
-    public static Status codeOf(String code) {
-        return Arrays.stream(Status.values())
+    public static JobStatus codeOf(String code) {
+        return Arrays.stream(JobStatus.values())
                 .filter(v -> v.getStatusCode().equalsIgnoreCase(code))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("not found code(%s) in JobStatus.", code)));
+                .orElseThrow(() -> new IllegalArgumentException(String.format("not found code(%s) in WorkStatus.", code)));
     }
 
     @JsonCreator
-    public static Status nameOf(String name) {
-        return Arrays.stream(Status.values())
+    public static JobStatus nameOf(String name) {
+        return Arrays.stream(JobStatus.values())
                 .filter(v->v.getStatusName().equalsIgnoreCase(name))
                 .findAny()
-                .orElseThrow(()->new IllegalArgumentException(String.format("not found value(%s) in PeJobStatusriodStatus.", name)));
+                .orElseThrow(()->new IllegalArgumentException(String.format("not found value(%s) in WorkStatus.", name)));
     }
 }

@@ -32,14 +32,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         log.info("## User found with user: {}", user.toString());
         log.info("매칭 여부: {}", passwordEncoder.encode("123456"));
         log.info("매칭 여부: {}", passwordEncoder.matches("123456", user.getPassword()));
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role))
-                .collect(Collectors.toList());
-        
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword())
-                .authorities(authorities)
-                .build();
+        TeamUserDetails userDetails = new TeamUserDetails(user);
+        user.getRoles().stream().forEach(role ->userDetails.setUserRole(role));
+
+        return userDetails;
+//        new TeamUserDetails()
+//                .withUsername(user.getUsername())
+//                .password(user.getPassword())
+//                .authorities(authorities)
+//                .build();
     }
 }

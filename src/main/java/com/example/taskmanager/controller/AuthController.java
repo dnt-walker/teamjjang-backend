@@ -55,7 +55,7 @@ public class AuthController {
         return ResponseEntity.ok(userDto);
     }
 
-    @PostMapping("/auth/refresh")
+    @PostMapping("/refresh")
     @Operation(summary = "토큰 새로 발급", description = "리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급합니다")
     public ResponseEntity<JwtResponseDto> refreshToken(@RequestBody @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "리프래시 토큰 정보") RefreshTokenRequestDto request,
                                                        @AuthenticationPrincipal UserDetails userDetails) {
@@ -63,7 +63,7 @@ public class AuthController {
         return ResponseEntity.ok(jwtResponse);
     }
 
-    @PostMapping("/auth/logout")
+    @PostMapping("/logout")
     @Operation(summary = "로그아웃", description = "사용자 로그아웃 처리를 합니다")
     public ResponseEntity<?> logout(@RequestBody @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "리프래시 토큰 정보") RefreshTokenRequestDto request,
                                     @AuthenticationPrincipal UserDetails userDetails) {

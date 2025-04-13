@@ -5,18 +5,22 @@ import com.example.taskmanager.domain.Project;
 import com.example.taskmanager.domain.ProjectAssignedUser;
 import com.example.taskmanager.domain.User;
 import com.example.taskmanager.dto.ProjectDto;
+import com.example.taskmanager.dto.ProjectFilterDto;
+import com.example.taskmanager.dto.StatusSummaryDto;
 import com.example.taskmanager.repository.ProjectAssignedUserRepository;
 import com.example.taskmanager.repository.ProjectRepository;
 import com.example.taskmanager.repository.TaskRepository;
 import com.example.taskmanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,10 +28,68 @@ import java.util.stream.Collectors;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
-    private final TaskService taskService;
     private final UserRepository userRepository;
     private final ProjectAssignedUserRepository projectAssignedUserRepository;
     private final UserService userService;
+
+    @Transactional(readOnly = true)
+    public List<ProjectDto> getProjectList(Pageable pageable,
+                                           ProjectFilterDto filterDto) {
+
+        if (pageable == null) {
+            pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "startDate"));
+        }
+        return projectRepository.pagedProjectList(pageable, filterDto).stream()
+                .map(ProjectDto::from)
+                .collect(Collectors.toList());
+    }
+
+    public StatusSummaryDto getProjectSummary() {
+        long totalProjectCount = projectRepository.count();
+        long activeProjectCount = projectRepository.countByStatus(JobStatus.IN_PROGRESS);
+        long finishedProjectCount = projectRepository.countByStatus(JobStatus.FINISHED);
+        long stoppedProjectCount = projectRepository.countByStatus(JobStatus.STOP);
+        long cancelProjectCount = projectRepository.countByStatus(JobStatus.CANCEL);
+        long repoenProjectCount = projectRepository.countByStatus(JobStatus.REOPEN);
+        long createProjectCount = projectRepository.countByStatus(JobStatus.CREATED);
+
+        StatusSummaryDto dto = new StatusSummaryDto(totalProjectCount, activeProjectCount,
+                finishedProjectCount, stoppedProjectCount, cancelProjectCount,createProjectCount, repoenProjectCount);
+
+        return dto;
+    }
+
+    public StatusSummaryDto getTaskSummary(Long projectId) {
+        long totalProjectCount = taskRepository.countByProject(projectId);
+        long activeProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.IN_PROGRESS);
+        long finishedProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.FINISHED);
+        long stoppedProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.STOP);
+        long cancelProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.CANCEL);
+        long repoenProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.REOPEN);
+        long createProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.CREATED);
+
+        StatusSummaryDto dto = new StatusSummaryDto(totalProjectCount, activeProjectCount,
+                finishedProjectCount, stoppedProjectCount, cancelProjectCount,createProjectCount, repoenProjectCount);
+
+        return dto;
+    }
+
+    public StatusSummaryDto getUserTaskSummary(UserDetails userDetails, Long projectId) {
+        long totalProjectCount = taskRepository.countByProject(projectId);
+        long activeProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.IN_PROGRESS);
+        long finishedProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.FINISHED);
+        long stoppedProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.STOP);
+        long cancelProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.CANCEL);
+        long repoenProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.REOPEN);
+        long createProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.CREATED);
+
+        StatusSummaryDto dto = new StatusSummaryDto(totalProjectCount, activeProjectCount,
+                finishedProjectCount, stoppedProjectCount, cancelProjectCount,createProjectCount, repoenProjectCount);
+
+        return dto;
+    }
+
+
 
     @Transactional
     public ProjectDto createProjectWithUsers(ProjectDto projectDto) {
@@ -44,13 +106,6 @@ public class ProjectService {
 
         Project savedProject = projectRepository.save(project);
         return ProjectDto.from(savedProject);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ProjectDto> getProjectList() {
-        return projectRepository.findAll().stream()
-                .map(ProjectDto::from)
-                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)

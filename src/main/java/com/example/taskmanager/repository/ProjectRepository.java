@@ -1,5 +1,6 @@
 package com.example.taskmanager.repository;
 
+import com.example.taskmanager.constant.JobStatus;
 import com.example.taskmanager.domain.Project;
 import com.example.taskmanager.domain.SubTask;
 import com.example.taskmanager.domain.User;
@@ -43,5 +44,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, Project
     Optional<Project> findById(@Param("projectId") Long projectId);
 
 
+    @Query("SELECT count(t) FROM Project t " +
+            " WHERE t.status = :status ")
+    Long countByStatus(JobStatus status);
 
 }

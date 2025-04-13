@@ -1,7 +1,11 @@
 package com.example.taskmanager.repository;
 
+import com.example.taskmanager.constant.JobStatus;
 import com.example.taskmanager.domain.SubTask;
 import com.example.taskmanager.domain.Task;
+import com.example.taskmanager.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +16,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TaskRepository extends JpaRepository<Task, Long>, TaskRepositoryCustom {
+
+    @Query("SELECT t FROM Task t " +
+            " JOIN t.assignedUsers u " +
+            " JOIN t.register r " +
+            " JOIN t.modifier m ")
+    Page<Task> findAll(Pageable pageable);
 
     @EntityGraph(attributePaths = {
             "project",
@@ -36,5 +46,36 @@ public interface TaskRepository extends JpaRepository<Task, Long>, TaskRepositor
             " JOIN t.modifier m " +
             " WHERE t.id = :taskId AND p.id = :projectId")
     Optional<Task> findByProjectIdAndId( @Param("projectId") Long projectId, @Param("taskId") Long taskId);
+
+    Long countByStatus(JobStatus status);
+
+
+    @Query("SELECT t FROM Task t " +
+            " JOIN t.project p " +
+            " WHERE p.id = :projectId")
+    Long countByProject(@Param("projectId") Long projectId);
+
+    @Query("SELECT t FROM Task t " +
+            " JOIN t.project p " +
+            " WHERE p.id = :projectId AND p.status = :status")
+    Long countByProjectAndStatus(@Param("projectId") Long projectId,
+                        @Param("status") JobStatus status);
+
+
+    @Query("SELECT t FROM Task t " +
+            " JOIN t.project p " +
+            " JOIN t.assignedUsers a " +
+            " WHERE p.id = :projectId AND a.user = :user ")
+    Long countByProjectAndUser(@Param("projectId") Long projectId, @Param("user") User user);
+
+    @Query("SELECT t FROM Task t " +
+            " JOIN t.project p " +
+            " JOIN t.assignedUsers a " +
+            " WHERE p.id = :projectId AND p.status = :status AND a.user = :user ")
+    Long countByProjectAndStatusAndUser(@Param("projectId") Long projectId,
+                                 @Param("status") JobStatus status,
+                                  @Param("user") User user);
+
+
 
 }

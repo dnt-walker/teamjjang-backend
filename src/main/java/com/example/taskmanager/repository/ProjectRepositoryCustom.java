@@ -2,6 +2,8 @@ package com.example.taskmanager.repository;
 
 import com.example.taskmanager.domain.Project;
 import com.example.taskmanager.domain.User;
+import com.example.taskmanager.dto.ProjectFilterDto;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -16,5 +18,6 @@ public interface ProjectRepositoryCustom {
      * @param upcoming 예정된 프로젝트 필터링 (true: 시작일이 현재 이후인 프로젝트)
      * @return 조건에 맞는 프로젝트 목록
      */
-    List<Project> searchProjects(Boolean active, User manager, Boolean hasTasks, Boolean upcoming);
+//    List<Project> searchProjects(Boolean active, User manager, Boolean hasTasks, Boolean upcoming);
+    List<Project> pagedProjectList(Pageable pageable, ProjectFilterDto filterDto);
 }

@@ -1,6 +1,8 @@
 package com.example.taskmanager.repository;
 
+import com.example.taskmanager.constant.JobStatus;
 import com.example.taskmanager.domain.SubTask;
+import com.example.taskmanager.dto.StatusSummaryDto;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -38,4 +40,14 @@ public interface SubTaskRepository extends JpaRepository<SubTask, Long> {
     Optional<SubTask> findByTaskIdAndSubTaskId( @Param("taskId") Long taskId,
                                                 @Param("subTaskId") Long subTaskId);
 
+    @Query("SELECT count(t) FROM SubTask t " +
+            " WHERE  t.task.id = :taskId  AND t.task.project.id = :projectId")
+    Long count(@Param("projectId") Long projectId,
+                       @Param("taskId") Long taskId);
+
+    @Query("SELECT count(t) FROM SubTask t " +
+            " WHERE  t.task.id = :taskId  AND t.task.project.id = :projectId AND t.status = :status")
+    Long countByProjectIdAndTaskIdAndStatus(@Param("projectId") Long projectId,
+                                            @Param("taskId") Long taskId,
+                                            @Param("status") JobStatus status);
 }

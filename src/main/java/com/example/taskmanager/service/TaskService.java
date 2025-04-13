@@ -5,17 +5,15 @@ import com.example.taskmanager.domain.Project;
 import com.example.taskmanager.domain.Task;
 import com.example.taskmanager.domain.User;
 import com.example.taskmanager.domain.TaskAssignedUser;
+import com.example.taskmanager.dto.StatusSummaryDto;
 import com.example.taskmanager.dto.TaskDto;
 import com.example.taskmanager.exception.ResourceNotFoundException;
-import com.example.taskmanager.repository.ProjectRepository;
-import com.example.taskmanager.repository.TaskRepository;
-import com.example.taskmanager.repository.UserRepository;
-import com.example.taskmanager.repository.TaskAssignedUserRepository;
+import com.example.taskmanager.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,7 +24,7 @@ public class TaskService {
     private final UserRepository userRepository;
     private final TaskAssignedUserRepository taskAssignedUserRepository;
     private final ProjectRepository projectRepository;
-
+    private final SubTaskRepository subTaskRepository;
 
 
     @Transactional
@@ -47,6 +45,44 @@ public class TaskService {
 
         Task savedTask = taskRepository.save(task);
         return TaskDto.from(savedTask);
+    }
+
+
+    public StatusSummaryDto getTaskSummary() {
+        long totalCount = taskRepository.count();
+        long activeCount = taskRepository.countByStatus(JobStatus.IN_PROGRESS);
+        long finishedCount = taskRepository.countByStatus(JobStatus.FINISHED);
+        long stoppedCount = taskRepository.countByStatus(JobStatus.STOP);
+        long cancelCount = taskRepository.countByStatus(JobStatus.CANCEL);
+        long repoenCount = taskRepository.countByStatus(JobStatus.REOPEN);
+        long createCount = taskRepository.countByStatus(JobStatus.CREATED);
+
+        StatusSummaryDto dto = new StatusSummaryDto(totalCount, activeCount,
+                finishedCount, stoppedCount, cancelCount,createCount, repoenCount);
+
+        return dto;
+    }
+
+    public StatusSummaryDto getSubTaskSummary(Long projectId, Long taskId) {
+        long totalCount = subTaskRepository.count(projectId, taskId);
+        long activeCount = subTaskRepository.countByProjectIdAndTaskIdAndStatus(projectId, taskId, JobStatus.IN_PROGRESS);
+        long finishedCount = subTaskRepository.countByProjectIdAndTaskIdAndStatus(projectId, taskId, JobStatus.FINISHED);
+        long stoppedCount = subTaskRepository.countByProjectIdAndTaskIdAndStatus(projectId, taskId, JobStatus.STOP);
+        long cancelCount = subTaskRepository.countByProjectIdAndTaskIdAndStatus(projectId, taskId, JobStatus.CANCEL);
+        long repoenCount = subTaskRepository.countByProjectIdAndTaskIdAndStatus(projectId, taskId, JobStatus.REOPEN);
+        long createCount = subTaskRepository.countByProjectIdAndTaskIdAndStatus(projectId, taskId, JobStatus.CREATED);
+
+        StatusSummaryDto dto = new StatusSummaryDto(totalCount, activeCount,
+                finishedCount, stoppedCount, cancelCount,createCount, repoenCount);
+
+        return dto;
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<TaskDto> getTaskList(Pageable pageable) {
+        List<Task> tasks = taskRepository.findAll(pageable).getContent();
+        return tasks.stream().map(TaskDto::from).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)

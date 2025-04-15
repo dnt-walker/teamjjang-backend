@@ -13,4 +13,7 @@ public abstract class ModifiedDto extends RegisteredDto {
 
     @Schema(description = "수정자")
     protected UserDto.UserSummaryDto modifier;
+
+
+
 }

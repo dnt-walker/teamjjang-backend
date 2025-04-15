@@ -50,4 +50,10 @@ public interface SubTaskRepository extends JpaRepository<SubTask, Long> {
     Long countByProjectIdAndTaskIdAndStatus(@Param("projectId") Long projectId,
                                             @Param("taskId") Long taskId,
                                             @Param("status") JobStatus status);
+
+
+    @Query("SELECT count(t) FROM SubTask t " +
+            " WHERE  t.task.id = :taskId  AND t.task.project.id = :projectId AND t.status = :status" +
+            " AND t.status not in('CC', 'FS') AND (t.endTime = null OR t.endTime < CURRENT_TIME)  ")
+    Long countByOverDateTask(@Param("projectId") Long projectId, @Param("taskId") Long taskId);
 }

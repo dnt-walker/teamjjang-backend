@@ -56,9 +56,10 @@ public class TaskService {
         long cancelCount = taskRepository.countByStatus(JobStatus.CANCEL);
         long repoenCount = taskRepository.countByStatus(JobStatus.REOPEN);
         long createCount = taskRepository.countByStatus(JobStatus.CREATED);
+        long overDateCount = taskRepository.countByAllOverDateTask();
 
         StatusSummaryDto dto = new StatusSummaryDto(totalCount, activeCount,
-                finishedCount, stoppedCount, cancelCount,createCount, repoenCount);
+                finishedCount, stoppedCount, cancelCount,createCount, repoenCount, overDateCount);
 
         return dto;
     }
@@ -71,9 +72,10 @@ public class TaskService {
         long cancelCount = subTaskRepository.countByProjectIdAndTaskIdAndStatus(projectId, taskId, JobStatus.CANCEL);
         long repoenCount = subTaskRepository.countByProjectIdAndTaskIdAndStatus(projectId, taskId, JobStatus.REOPEN);
         long createCount = subTaskRepository.countByProjectIdAndTaskIdAndStatus(projectId, taskId, JobStatus.CREATED);
+        long overDateCount = subTaskRepository.countByOverDateTask(projectId, taskId);
 
         StatusSummaryDto dto = new StatusSummaryDto(totalCount, activeCount,
-                finishedCount, stoppedCount, cancelCount,createCount, repoenCount);
+                finishedCount, stoppedCount, cancelCount,createCount, repoenCount, overDateCount);
 
         return dto;
     }

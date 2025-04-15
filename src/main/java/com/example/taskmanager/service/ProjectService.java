@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,12 +51,15 @@ public class ProjectService {
         long cancelProjectCount = projectRepository.countByStatus(JobStatus.CANCEL);
         long repoenProjectCount = projectRepository.countByStatus(JobStatus.REOPEN);
         long createProjectCount = projectRepository.countByStatus(JobStatus.CREATED);
-
+        long overDateProjectCount = projectRepository.countByOverDateProject();
         StatusSummaryDto dto = new StatusSummaryDto(totalProjectCount, activeProjectCount,
-                finishedProjectCount, stoppedProjectCount, cancelProjectCount,createProjectCount, repoenProjectCount);
+                finishedProjectCount, stoppedProjectCount,
+                cancelProjectCount,createProjectCount, repoenProjectCount,
+                overDateProjectCount);
 
         return dto;
     }
+
 
     public StatusSummaryDto getTaskSummary(Long projectId) {
         long totalProjectCount = taskRepository.countByProject(projectId);
@@ -67,28 +69,32 @@ public class ProjectService {
         long cancelProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.CANCEL);
         long repoenProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.REOPEN);
         long createProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.CREATED);
+        long overDateTaskCount = taskRepository.countByProjectOverDateTask(projectId);
 
         StatusSummaryDto dto = new StatusSummaryDto(totalProjectCount, activeProjectCount,
-                finishedProjectCount, stoppedProjectCount, cancelProjectCount,createProjectCount, repoenProjectCount);
+                finishedProjectCount, stoppedProjectCount,
+                cancelProjectCount,createProjectCount, repoenProjectCount,
+                overDateTaskCount);
 
         return dto;
     }
 
-    public StatusSummaryDto getUserTaskSummary(UserDetails userDetails, Long projectId) {
-        long totalProjectCount = taskRepository.countByProject(projectId);
-        long activeProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.IN_PROGRESS);
-        long finishedProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.FINISHED);
-        long stoppedProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.STOP);
-        long cancelProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.CANCEL);
-        long repoenProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.REOPEN);
-        long createProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.CREATED);
-
-        StatusSummaryDto dto = new StatusSummaryDto(totalProjectCount, activeProjectCount,
-                finishedProjectCount, stoppedProjectCount, cancelProjectCount,createProjectCount, repoenProjectCount);
-
-        return dto;
-    }
-
+//    public StatusSummaryDto getUserTaskSummary(UserDetails userDetails, Long projectId) {
+//        TeamUserDetails teamUserDetails = (TeamUserDetails)userDetails;
+//        long totalProjectCount = taskRepository.countByProject(projectId);
+//        long activeProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.IN_PROGRESS, );
+//        long finishedProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.FINISHED);
+//        long stoppedProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.STOP);
+//        long cancelProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.CANCEL);
+//        long repoenProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.REOPEN);
+//        long createProjectCount = taskRepository.countByProjectAndStatus(projectId, JobStatus.CREATED);
+//        long overDateTaskCount = taskRepository.countByOverDateTask(projectId);
+//        StatusSummaryDto dto = new StatusSummaryDto(totalProjectCount, activeProjectCount,
+//                finishedProjectCount, stoppedProjectCount, cancelProjectCount,createProjectCount, repoenProjectCount);
+//
+//        return dto;
+//    }
+//
 
 
     @Transactional

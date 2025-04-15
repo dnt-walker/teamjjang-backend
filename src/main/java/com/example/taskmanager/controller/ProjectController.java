@@ -85,11 +85,11 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.getTaskSummary(projectId));
     }
 
-    @Operation(summary = "프로젝트의 Task의 상태 조회")
-    @GetMapping("/api/projects/{projectId}/user-summaries")
-    public ResponseEntity<StatusSummaryDto> getUserTaskSummary(
-            @Parameter(description = "프로젝트 ID") @PathVariable Long projectId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(projectService.getUserTaskSummary(userDetails, projectId));
-    }
+//    @Operation(summary = "프로젝트의 Task의 상태 조회")
+//    @GetMapping("/api/projects/{projectId}/user-summaries")
+//    public ResponseEntity<StatusSummaryDto> getUserTaskSummary(
+//            @Parameter(description = "프로젝트 ID") @PathVariable Long projectId,
+//            @AuthenticationPrincipal UserDetails userDetails) {
+//        return ResponseEntity.ok(projectService.getUserTaskSummary(userDetails, projectId));
+//    }
 }

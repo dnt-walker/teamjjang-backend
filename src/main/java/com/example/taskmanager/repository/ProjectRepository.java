@@ -48,4 +48,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, Project
             " WHERE t.status = :status ")
     Long countByStatus(JobStatus status);
 
+    @Query("SELECT count(t) FROM Project t " +
+            " WHERE t.status not in('CC', 'FS') AND (t.endDate = null OR t.endDate < CURRENT_DATE)  ")
+    Long countByOverDateProject();
+
 }

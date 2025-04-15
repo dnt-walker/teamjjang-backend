@@ -41,6 +41,12 @@ public class ProjectDto extends ModifiedDto implements Serializable {
     @Schema(description = "종료일", example = "2025-06-30")
     private LocalDate endDate;
 
+    @Schema(description = "전체 작업 가능 일수(Working DAY)", example = "10")
+    private Long workingDays;
+
+    @Schema(description = "프로젝트 경과 일수(지난 Working DAY)", example = "10")
+    private Long usedWorkingDays;
+
     private JobStatus status;
 
     @Schema(description = "할당된 사용자 목록")
@@ -67,6 +73,7 @@ public class ProjectDto extends ModifiedDto implements Serializable {
         }
     }
 
+
     // 프로젝트 엔티티로부터 DTO 생성 - 기본 정보만 포함
     public static ProjectDto from(Project project) {
         if (project == null) return null;
@@ -79,6 +86,9 @@ public class ProjectDto extends ModifiedDto implements Serializable {
                 .endDate(project.getEndDate())
                 .status(project.getStatus())
                 .build();
+
+        dto.setWorkingDays(dto.workingDaysBetween(project.getStartDate(), project.getEndDate()));
+        dto.setUsedWorkingDays(dto.elapsedWorkingDaysFrom(project.getStartDate()));
 
         // 매니저 정보 설정
         if (project.getManager() != null) {

@@ -2,6 +2,7 @@ package com.example.taskmanager.controller;
 
 import com.example.taskmanager.dto.ProjectDto;
 import com.example.taskmanager.dto.ProjectFilterDto;
+import com.example.taskmanager.dto.ProjectRequestDto;
 import com.example.taskmanager.dto.StatusSummaryDto;
 import com.example.taskmanager.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,7 +49,7 @@ public class ProjectController {
     @PostMapping("/api/projects")
     public ResponseEntity<ProjectDto> createProject(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "프로젝트 정보")
-            @RequestBody ProjectDto projectDto) {
+            @RequestBody ProjectRequestDto projectDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProjectWithUsers(projectDto));
     }
 
@@ -64,7 +65,7 @@ public class ProjectController {
     public ResponseEntity<ProjectDto> updateProject(
             @Parameter(description = "프로젝트 ID") @PathVariable Long projectId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "수정할 프로젝트 정보")
-            @RequestBody ProjectDto projectDto) {
+            @RequestBody ProjectRequestDto projectDto) {
         return ResponseEntity.ok(ProjectDto.from(projectService.updateProjectWithUsers(projectId, projectDto)));
     }
 

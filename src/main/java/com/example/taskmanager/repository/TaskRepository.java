@@ -59,6 +59,11 @@ public interface TaskRepository extends JpaRepository<Task, Long>, TaskRepositor
     Long countByProjectAndStatus(@Param("projectId") Long projectId,
                         @Param("status") JobStatus status);
 
+    @Query("SELECT count(t) FROM Task t " +
+            " JOIN t.project p " +
+            " WHERE p.id = :projectId AND p.status in ('FS', 'CC')")
+    Long countByProjectCompltedTask(@Param("projectId") Long projectId);
+
 
     @Query("SELECT count(t) FROM Task t " +
             " JOIN t.project p " +

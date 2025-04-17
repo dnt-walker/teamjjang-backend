@@ -40,11 +40,5 @@ public class TaskAssignedUser extends RegisteredEntity implements Serializable {
 
     public void setTask(Task task) {
         this.task = task;
-        this.task.addAssignedUser(this);
-    }
-
-    public void removeTask() {
-        this.task.getAssignedUsers().remove(this);
-        this.task = null;
     }
 }

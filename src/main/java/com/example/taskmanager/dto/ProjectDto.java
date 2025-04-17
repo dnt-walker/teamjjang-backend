@@ -47,6 +47,10 @@ public class ProjectDto extends ModifiedDto implements Serializable {
     @Schema(description = "프로젝트 경과 일수(지난 Working DAY)", example = "10")
     private Long usedWorkingDays;
 
+    private Integer completedTasksPercentage;
+
+    private StatusSummaryDto taskStatusSummary;
+
     private JobStatus status;
 
     @Schema(description = "할당된 사용자 목록")
@@ -72,7 +76,6 @@ public class ProjectDto extends ModifiedDto implements Serializable {
                     .build();
         }
     }
-
 
     // 프로젝트 엔티티로부터 DTO 생성 - 기본 정보만 포함
     public static ProjectDto from(Project project) {
@@ -116,30 +119,30 @@ public class ProjectDto extends ModifiedDto implements Serializable {
         return dto;
     }
 
-    // DTO를 엔티티로 변환 - 새 프로젝트 생성용
-    public Project toEntity(User manager) {
-        // Check if manager is not null; if null, set managerEntity to null to avoid NPE
+//    // DTO를 엔티티로 변환 - 새 프로젝트 생성용
+//    public Project toEntity(User manager) {
+//        // Check if manager is not null; if null, set managerEntity to null to avoid NPE
+////        User managerEntity = (this.manager != null) ? getUser.apply(this.manager.getId()) : null;
+//        return new Project(
+//                this.id,
+//                this.name,
+//                this.description,
+//                this.startDate,
+//                this.endDate,
+//                manager
+//        );
+//    }
+//
+//    public Project toEntity(Function<Long, User> getUser) {
+//        // Check if manager is not null; if null, set managerEntity to null to avoid NPE
 //        User managerEntity = (this.manager != null) ? getUser.apply(this.manager.getId()) : null;
-        return new Project(
-                this.id,
-                this.name,
-                this.description,
-                this.startDate,
-                this.endDate,
-                manager
-        );
-    }
-
-    public Project toEntity(Function<Long, User> getUser) {
-        // Check if manager is not null; if null, set managerEntity to null to avoid NPE
-        User managerEntity = (this.manager != null) ? getUser.apply(this.manager.getId()) : null;
-        return new Project(
-                this.id,
-                this.name,
-                this.description,
-                this.startDate,
-                this.endDate,
-                managerEntity
-        );
-    }
+//        return new Project(
+//                this.id,
+//                this.name,
+//                this.description,
+//                this.startDate,
+//                this.endDate,
+//                managerEntity
+//        );
+//    }
 }

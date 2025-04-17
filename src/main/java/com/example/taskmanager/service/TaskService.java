@@ -1,12 +1,10 @@
 package com.example.taskmanager.service;
 
 import com.example.taskmanager.constant.JobStatus;
-import com.example.taskmanager.domain.Project;
-import com.example.taskmanager.domain.Task;
-import com.example.taskmanager.domain.User;
-import com.example.taskmanager.domain.TaskAssignedUser;
+import com.example.taskmanager.domain.*;
 import com.example.taskmanager.dto.StatusSummaryDto;
 import com.example.taskmanager.dto.TaskDto;
+import com.example.taskmanager.dto.TaskRequestDto;
 import com.example.taskmanager.exception.ResourceNotFoundException;
 import com.example.taskmanager.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -28,20 +26,18 @@ public class TaskService {
 
 
     @Transactional
-    public TaskDto createTaskWithUsers(Long projectId, TaskDto taskDto) {
+    public TaskDto createTaskWithUsers(Long projectId, TaskRequestDto taskDto) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "projectId", projectId));
 
         Task task = taskDto.toEntity(project);
 
         List<TaskAssignedUser> assignedUsers = new ArrayList<>();
-        for (var userDto : taskDto.getAssignees()) {
-            User user = userRepository.findById(userDto.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("User", "userId", userDto.getId()));
-            assignedUsers.add(new TaskAssignedUser(user, task));
+        for (Long userId: taskDto.getAssignees()) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User", "userId", userId));
+            task.addAssignedUser(new TaskAssignedUser(user, task)); // 양방향 연관관계 설정
         }
-
-//        task.setAssignedUsers(assignedUsers);
 
         Task savedTask = taskRepository.save(task);
         return TaskDto.from(savedTask);
@@ -101,23 +97,25 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDto updateTaskWithUsers(Long projectId, Long taskId, TaskDto taskDto) {
+    public TaskDto updateTaskWithUsers(Long projectId, Long taskId, TaskRequestDto taskDto) {
         Task task = taskRepository.findByProjectIdAndId(projectId, taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "taskId", taskId));
+
+        // 기존 연관관계 제거: 양방향 관계를 정확히 끊어줘야 Hibernate 오류 방지 가능
+        List<TaskAssignedUser> existingUsers = new ArrayList<>(task.getAssignedUsers());
+        task.getAssignedUsers().clear(); // 컬렉션에서 제거
+        taskAssignedUserRepository.deleteAllInBatch(existingUsers); // 강제 삭제
+
+        for (Long userId: taskDto.getAssignees()) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User", "userId", userId));
+            TaskAssignedUser assignedUser = new TaskAssignedUser(user, task);
+            task.addAssignedUser(assignedUser); // 양방향 연관관계 설정
+        }
 
         task.update(taskDto.getName(), taskDto.getStartDate(),
                 taskDto.getPlannedEndDate(), taskDto.getCompletionDate(),
                 taskDto.getDescription(), taskDto.getStatus());
-
-        task.getAssignedUsers().forEach(TaskAssignedUser::removeTask);
-
-        List<TaskAssignedUser> updatedUsers = new ArrayList<>();
-        for (var userDto : taskDto.getAssignees()) {
-            User user = userRepository.findById(userDto.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("User", "userId", userDto.getId()));
-            updatedUsers.add(new TaskAssignedUser(user, task));
-        }
-//        task.getAssignedUsers().addAll(updatedUsers);
 
         return TaskDto.from(taskRepository.save(task));
     }

@@ -39,11 +39,5 @@ public class ProjectAssignedUser extends RegisteredEntity implements Serializabl
 
     public void setProject(Project project) {
         this.project = project;
-        this.project.addAssignedUser(this);
-    }
-
-    public void removeProject() {
-        this.project.getAssignedUsers().remove(this);
-        this.project = null;
     }
 }

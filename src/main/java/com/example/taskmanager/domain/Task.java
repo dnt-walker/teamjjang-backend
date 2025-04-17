@@ -130,6 +130,15 @@ public class Task extends ModifiedEntity implements Serializable {
 
     public void addAssignedUser(TaskAssignedUser assignedUser) {
         assignedUsers.add(assignedUser);
+        assignedUser.setTask(this); // 역방향 연결도 동기화
     }
 
+    public void removeAssignedUser(TaskAssignedUser assignedUser) {
+        assignedUser.setTask(null);
+        assignedUsers.remove(assignedUser);
+    }
+
+    public void clearAssignedUsers() {
+        assignedUsers.clear();
+    }
 }

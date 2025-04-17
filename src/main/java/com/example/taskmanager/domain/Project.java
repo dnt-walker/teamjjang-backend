@@ -109,6 +109,16 @@ public class Project extends ModifiedEntity implements Serializable {
     }
 
     public void addAssignedUser(ProjectAssignedUser assignedUser) {
-        this.assignedUsers.add(assignedUser);
+        assignedUsers.add(assignedUser);
+        assignedUser.setProject(this); // 역방향 연결도 동기화
+    }
+
+    public void removeAssignedUser(ProjectAssignedUser assignedUser) {
+        assignedUser.setProject(null);
+        assignedUsers.remove(assignedUser);
+    }
+
+    public void clearAssignedUsers() {
+        assignedUsers.clear();
     }
 }

@@ -3,6 +3,7 @@ package com.example.taskmanager.controller;
 import com.example.taskmanager.constant.JobStatus;
 import com.example.taskmanager.dto.StatusSummaryDto;
 import com.example.taskmanager.dto.TaskDto;
+import com.example.taskmanager.dto.TaskRequestDto;
 import com.example.taskmanager.dto.UserDto;
 import com.example.taskmanager.security.TeamUserDetails;
 import com.example.taskmanager.service.TaskService;
@@ -56,7 +57,7 @@ public class TaskController {
     @PostMapping("/api/projects/{projectId}/tasks")
     public ResponseEntity<TaskDto> createOrUpdateTask(
             @Parameter(description = "프로젝트 ID") @PathVariable Long projectId,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "태스크 정보") @RequestBody TaskDto taskDto
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "태스크 정보") @RequestBody TaskRequestDto taskDto
     ) {
         TaskDto saved = taskService.createTaskWithUsers(projectId, taskDto);
         return ResponseEntity.ok(saved);
@@ -89,7 +90,7 @@ public class TaskController {
     public ResponseEntity<TaskDto> updateTask(
             @Parameter(description = "프로젝트 ID") @PathVariable Long projectId,
             @Parameter(description = "태스크 ID") @PathVariable Long taskId,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "수정할 태스크 정보") @RequestBody TaskDto taskDto
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "수정할 태스크 정보") @RequestBody TaskRequestDto taskDto
     ) {
         TaskDto updatedTask = taskService.updateTaskWithUsers(projectId, taskId, taskDto);
         return ResponseEntity.ok(updatedTask);
